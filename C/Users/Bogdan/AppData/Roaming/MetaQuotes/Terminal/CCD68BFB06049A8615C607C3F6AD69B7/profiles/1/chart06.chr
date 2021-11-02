@@ -1,8 +1,8 @@
 <chart>
-id=132802245031439989
-symbol=EURAUD
-period=60
-leftpos=1995
+id=132802813582616962
+symbol=EURCHF
+period=15
+leftpos=2062
 digits=4
 scale=2
 graph=0
@@ -19,10 +19,10 @@ days=0
 descriptions=0
 shift_size=20
 fixed_pos=0
-window_left=367
-window_top=-1
-window_right=591
-window_bottom=773
+window_left=889
+window_top=0
+window_right=1106
+window_bottom=771
 window_type=1
 background_color=0
 foreground_color=0
@@ -43,10 +43,10 @@ fixed_height=0
 name=main
 <object>
 type=23
-object_name=AdxpUSDCHF
+object_name=HilowUSDCHF
 period_flags=0
-create_time=1635805604
-description=Adxp EURGBP : 27.968393
+create_time=1635828439
+description=Hilow GBPUSD : 5
 color=16776960
 font=Arial
 fontsize=10
@@ -63,10 +63,10 @@ y_distance=0
 </object>
 <object>
 type=23
-object_name=AdxpGBPUSD
+object_name=HilowGBPUSD
 period_flags=0
-create_time=1635805604
-description=Adxp EURUSD : 23.513433
+create_time=1635828439
+description=Hilow GBPJPY : 4
 color=16776960
 font=Arial
 fontsize=10
@@ -83,10 +83,10 @@ y_distance=15
 </object>
 <object>
 type=23
-object_name=AdxpEURUSD
+object_name=HilowEURUSD
 period_flags=0
-create_time=1635805604
-description=Adxp EURCAD : 20.975591
+create_time=1635828439
+description=Hilow EURUSD : 2
 color=16776960
 font=Arial
 fontsize=10
@@ -103,10 +103,10 @@ y_distance=30
 </object>
 <object>
 type=23
-object_name=AdxpUSDJPY
+object_name=HilowUSDJPY
 period_flags=0
-create_time=1635805604
-description=Adxp EURJPY : 20.109175
+create_time=1635828439
+description=Hilow GBPCHF : 2
 color=16776960
 font=Arial
 fontsize=10
@@ -123,11 +123,11 @@ y_distance=45
 </object>
 <object>
 type=23
-object_name=AdxpUSDCAD
+object_name=HilowUSDCAD
 period_flags=0
-create_time=1635805604
-description=Adxp GBPUSD : 19.324098
-color=65535
+create_time=1635828439
+description=Hilow AUDNZD : 2
+color=16776960
 font=Arial
 fontsize=10
 angle=0
@@ -143,11 +143,11 @@ y_distance=60
 </object>
 <object>
 type=23
-object_name=AdxpAUDUSD
+object_name=HilowAUDUSD
 period_flags=0
-create_time=1635805604
-description=Adxp AUDNZD : 18.706219
-color=65535
+create_time=1635828439
+description=Hilow AUDCAD : 2
+color=16776960
 font=Arial
 fontsize=10
 angle=0
@@ -163,11 +163,11 @@ y_distance=75
 </object>
 <object>
 type=23
-object_name=AdxpEURGBP
+object_name=HilowEURGBP
 period_flags=0
-create_time=1635805604
-description=Adxp EURAUD : 18.698336
-color=65535
+create_time=1635828439
+description=Hilow AUDJPY : 2
+color=16776960
 font=Arial
 fontsize=10
 angle=0
@@ -183,11 +183,11 @@ y_distance=90
 </object>
 <object>
 type=23
-object_name=AdxpEURAUD
+object_name=HilowEURAUD
 period_flags=0
-create_time=1635805604
-description=Adxp CHFJPY : 17.954023
-color=65535
+create_time=1635828439
+description=Hilow AUDUSD : 1
+color=16776960
 font=Arial
 fontsize=10
 angle=0
@@ -203,11 +203,11 @@ y_distance=105
 </object>
 <object>
 type=23
-object_name=AdxpEURCHF
+object_name=HilowEURCHF
 period_flags=0
-create_time=1635805604
-description=Adxp AUDUSD : 17.282075
-color=65535
+create_time=1635828439
+description=Hilow CADJPY : 1
+color=16776960
 font=Arial
 fontsize=10
 angle=0
@@ -223,10 +223,10 @@ y_distance=120
 </object>
 <object>
 type=23
-object_name=AdxpEURJPY
+object_name=HilowEURJPY
 period_flags=0
-create_time=1635805604
-description=Adxp AUDJPY : 16.762025
+create_time=1635828439
+description=Hilow USDJPY : 0
 color=65535
 font=Arial
 fontsize=10
@@ -243,10 +243,10 @@ y_distance=135
 </object>
 <object>
 type=23
-object_name=AdxpGBPCHF
+object_name=HilowGBPCHF
 period_flags=0
-create_time=1635805604
-description=Adxp EURNZD : 16.451842
+create_time=1635828439
+description=Hilow USDCAD : 0
 color=65535
 font=Arial
 fontsize=10
@@ -263,10 +263,10 @@ y_distance=150
 </object>
 <object>
 type=23
-object_name=AdxpCADJPY
+object_name=HilowCADJPY
 period_flags=0
-create_time=1635805604
-description=Adxp AUDCAD : 15.711120
+create_time=1635828439
+description=Hilow EURJPY : 0
 color=65535
 font=Arial
 fontsize=10
@@ -283,10 +283,10 @@ y_distance=165
 </object>
 <object>
 type=23
-object_name=AdxpGBPJPY
+object_name=HilowGBPJPY
 period_flags=0
-create_time=1635805604
-description=Adxp GBPJPY : 15.451756
+create_time=1635828439
+description=Hilow AUDCHF : 0
 color=65535
 font=Arial
 fontsize=10
@@ -303,10 +303,10 @@ y_distance=180
 </object>
 <object>
 type=23
-object_name=AdxpAUDNZD
+object_name=HilowAUDNZD
 period_flags=0
-create_time=1635805604
-description=Adxp NZDUSD : 14.488973
+create_time=1635828439
+description=Hilow EURCAD : 0
 color=65535
 font=Arial
 fontsize=10
@@ -323,10 +323,10 @@ y_distance=195
 </object>
 <object>
 type=23
-object_name=AdxpAUDCAD
+object_name=HilowAUDCAD
 period_flags=0
-create_time=1635805604
-description=Adxp NZDJPY : 13.004118
+create_time=1635828439
+description=Hilow CADCHF : 0
 color=65535
 font=Arial
 fontsize=10
@@ -343,10 +343,10 @@ y_distance=210
 </object>
 <object>
 type=23
-object_name=AdxpAUDCHF
+object_name=HilowAUDCHF
 period_flags=0
-create_time=1635805604
-description=Adxp CADJPY : 12.241036
+create_time=1635828439
+description=Hilow NZDJPY : 0
 color=65535
 font=Arial
 fontsize=10
@@ -363,10 +363,10 @@ y_distance=225
 </object>
 <object>
 type=23
-object_name=AdxpAUDJPY
+object_name=HilowAUDJPY
 period_flags=0
-create_time=1635805604
-description=Adxp USDJPY : 11.605937
+create_time=1635828439
+description=Hilow NZDUSD : 0
 color=65535
 font=Arial
 fontsize=10
@@ -383,11 +383,11 @@ y_distance=240
 </object>
 <object>
 type=23
-object_name=AdxpCHFJPY
+object_name=HilowCHFJPY
 period_flags=0
-create_time=1635805604
-description=Adxp USDCAD : 10.115683
-color=65535
+create_time=1635828439
+description=Hilow USDCHF : -1
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -403,10 +403,10 @@ y_distance=255
 </object>
 <object>
 type=23
-object_name=AdxpEURNZD
+object_name=HilowEURNZD
 period_flags=0
-create_time=1635805604
-description=Adxp AUDCHF : 9.468894
+create_time=1635828439
+description=Hilow EURGBP : -1
 color=255
 font=Arial
 fontsize=10
@@ -423,10 +423,10 @@ y_distance=270
 </object>
 <object>
 type=23
-object_name=AdxpEURCAD
+object_name=HilowEURCAD
 period_flags=0
-create_time=1635805604
-description=Adxp EURCHF : 8.823956
+create_time=1635828439
+description=Hilow EURCHF : -1
 color=255
 font=Arial
 fontsize=10
@@ -443,10 +443,10 @@ y_distance=285
 </object>
 <object>
 type=23
-object_name=AdxpCADCHF
+object_name=HilowCADCHF
 period_flags=0
-create_time=1635805604
-description=Adxp GBPCHF : 7.213100
+create_time=1635828439
+description=Hilow EURNZD : -2
 color=255
 font=Arial
 fontsize=10
@@ -463,10 +463,10 @@ y_distance=300
 </object>
 <object>
 type=23
-object_name=AdxpNZDJPY
+object_name=HilowNZDJPY
 period_flags=0
-create_time=1635805604
-description=Adxp USDCHF : 6.831499
+create_time=1635828439
+description=Hilow EURAUD : -4
 color=255
 font=Arial
 fontsize=10
@@ -483,10 +483,10 @@ y_distance=315
 </object>
 <object>
 type=23
-object_name=AdxpNZDUSD
+object_name=HilowNZDUSD
 period_flags=0
-create_time=1635805604
-description=Adxp CADCHF : 4.347158
+create_time=1635828439
+description=Hilow CHFJPY : -8
 color=255
 font=Arial
 fontsize=10
@@ -503,10 +503,10 @@ y_distance=330
 </object>
 <object>
 type=23
-object_name=AdxmUSDCHF
+object_name=hilowD1USDCHF
 period_flags=0
-create_time=1635805604
-description=Adxm EURCAD : 4.517351
+create_time=1635828439
+description=hilowD1 EURAUD : 101
 color=16776960
 font=Arial
 fontsize=10
@@ -523,10 +523,10 @@ y_distance=360
 </object>
 <object>
 type=23
-object_name=AdxmGBPUSD
+object_name=hilowD1GBPUSD
 period_flags=0
-create_time=1635805604
-description=Adxm USDCAD : 4.643395
+create_time=1635828439
+description=hilowD1 EURNZD : 49
 color=16776960
 font=Arial
 fontsize=10
@@ -543,10 +543,10 @@ y_distance=375
 </object>
 <object>
 type=23
-object_name=AdxmEURUSD
+object_name=hilowD1EURUSD
 period_flags=0
-create_time=1635805604
-description=Adxm CHFJPY : 5.681566
+create_time=1635828439
+description=hilowD1 USDCAD : 27
 color=16776960
 font=Arial
 fontsize=10
@@ -563,10 +563,10 @@ y_distance=390
 </object>
 <object>
 type=23
-object_name=AdxmUSDJPY
+object_name=hilowD1USDJPY
 period_flags=0
-create_time=1635805604
-description=Adxm EURJPY : 8.360018
+create_time=1635828439
+description=hilowD1 EURCAD : 24
 color=16776960
 font=Arial
 fontsize=10
@@ -583,10 +583,10 @@ y_distance=405
 </object>
 <object>
 type=23
-object_name=AdxmUSDCAD
+object_name=hilowD1USDCAD
 period_flags=0
-create_time=1635805604
-description=Adxm EURGBP : 8.603999
+create_time=1635828439
+description=hilowD1 EURGBP : 11
 color=16776960
 font=Arial
 fontsize=10
@@ -603,10 +603,10 @@ y_distance=420
 </object>
 <object>
 type=23
-object_name=AdxmAUDUSD
+object_name=hilowD1AUDUSD
 period_flags=0
-create_time=1635805604
-description=Adxm NZDJPY : 8.763270
+create_time=1635828439
+description=hilowD1 USDCHF : 5
 color=16776960
 font=Arial
 fontsize=10
@@ -623,11 +623,11 @@ y_distance=435
 </object>
 <object>
 type=23
-object_name=AdxmEURGBP
+object_name=hilowD1EURGBP
 period_flags=0
-create_time=1635805604
-description=Adxm NZDUSD : 10.228664
-color=65535
+create_time=1635828439
+description=hilowD1 EURCHF : 3
+color=16776960
 font=Arial
 fontsize=10
 angle=0
@@ -643,10 +643,10 @@ y_distance=450
 </object>
 <object>
 type=23
-object_name=AdxmEURAUD
+object_name=hilowD1EURAUD
 period_flags=0
-create_time=1635805604
-description=Adxm EURAUD : 11.138111
+create_time=1635828439
+description=hilowD1 EURUSD : 0
 color=65535
 font=Arial
 fontsize=10
@@ -663,11 +663,11 @@ y_distance=465
 </object>
 <object>
 type=23
-object_name=AdxmEURCHF
+object_name=hilowD1EURCHF
 period_flags=0
-create_time=1635805604
-description=Adxm EURUSD : 11.209071
-color=65535
+create_time=1635828439
+description=hilowD1 GBPUSD : -12
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -683,11 +683,11 @@ y_distance=480
 </object>
 <object>
 type=23
-object_name=AdxmEURJPY
+object_name=hilowD1EURJPY
 period_flags=0
-create_time=1635805604
-description=Adxm CADJPY : 11.250606
-color=65535
+create_time=1635828439
+description=hilowD1 GBPCHF : -13
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -703,11 +703,11 @@ y_distance=495
 </object>
 <object>
 type=23
-object_name=AdxmGBPCHF
+object_name=hilowD1GBPCHF
 period_flags=0
-create_time=1635805604
-description=Adxm EURNZD : 11.404720
-color=65535
+create_time=1635828439
+description=hilowD1 CADCHF : -13
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -723,11 +723,11 @@ y_distance=510
 </object>
 <object>
 type=23
-object_name=AdxmCADJPY
+object_name=hilowD1CADJPY
 period_flags=0
-create_time=1635805604
-description=Adxm GBPUSD : 12.230750
-color=65535
+create_time=1635828439
+description=hilowD1 NZDUSD : -21
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -743,11 +743,11 @@ y_distance=525
 </object>
 <object>
 type=23
-object_name=AdxmGBPJPY
+object_name=hilowD1GBPJPY
 period_flags=0
-create_time=1635805604
-description=Adxm AUDUSD : 12.381779
-color=65535
+create_time=1635828439
+description=hilowD1 USDJPY : -30
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -763,11 +763,11 @@ y_distance=540
 </object>
 <object>
 type=23
-object_name=AdxmAUDNZD
+object_name=hilowD1AUDNZD
 period_flags=0
-create_time=1635805604
-description=Adxm GBPJPY : 12.494053
-color=65535
+create_time=1635828439
+description=hilowD1 AUDNZD : -33
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -783,11 +783,11 @@ y_distance=555
 </object>
 <object>
 type=23
-object_name=AdxmAUDCAD
+object_name=hilowD1AUDCAD
 period_flags=0
-create_time=1635805604
-description=Adxm AUDCAD : 12.553913
-color=65535
+create_time=1635828439
+description=hilowD1 CHFJPY : -36
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -803,11 +803,11 @@ y_distance=570
 </object>
 <object>
 type=23
-object_name=AdxmAUDCHF
+object_name=hilowD1AUDCHF
 period_flags=0
-create_time=1635805604
-description=Adxm AUDJPY : 13.305929
-color=65535
+create_time=1635828439
+description=hilowD1 EURJPY : -37
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -823,11 +823,11 @@ y_distance=585
 </object>
 <object>
 type=23
-object_name=AdxmAUDJPY
+object_name=hilowD1AUDJPY
 period_flags=0
-create_time=1635805604
-description=Adxm USDJPY : 13.359890
-color=65535
+create_time=1635828439
+description=hilowD1 AUDCAD : -39
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -843,11 +843,11 @@ y_distance=600
 </object>
 <object>
 type=23
-object_name=AdxmCHFJPY
+object_name=hilowD1CHFJPY
 period_flags=0
-create_time=1635805604
-description=Adxm AUDNZD : 13.456177
-color=65535
+create_time=1635828439
+description=hilowD1 AUDCHF : -43
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -863,11 +863,11 @@ y_distance=615
 </object>
 <object>
 type=23
-object_name=AdxmEURNZD
+object_name=hilowD1EURNZD
 period_flags=0
-create_time=1635805604
-description=Adxm EURCHF : 14.935836
-color=65535
+create_time=1635828439
+description=hilowD1 CADJPY : -44
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -883,11 +883,11 @@ y_distance=630
 </object>
 <object>
 type=23
-object_name=AdxmEURCAD
+object_name=hilowD1EURCAD
 period_flags=0
-create_time=1635805604
-description=Adxm AUDCHF : 17.237311
-color=65535
+create_time=1635828439
+description=hilowD1 AUDUSD : -46
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -903,11 +903,11 @@ y_distance=645
 </object>
 <object>
 type=23
-object_name=AdxmCADCHF
+object_name=hilowD1CADCHF
 period_flags=0
-create_time=1635805604
-description=Adxm CADCHF : 17.843946
-color=65535
+create_time=1635828439
+description=hilowD1 NZDJPY : -48
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -923,11 +923,11 @@ y_distance=660
 </object>
 <object>
 type=23
-object_name=AdxmNZDJPY
+object_name=hilowD1NZDJPY
 period_flags=0
-create_time=1635805604
-description=Adxm GBPCHF : 18.518209
-color=65535
+create_time=1635828439
+description=hilowD1 GBPJPY : -62
+color=255
 font=Arial
 fontsize=10
 angle=0
@@ -943,10 +943,10 @@ y_distance=675
 </object>
 <object>
 type=23
-object_name=AdxmNZDUSD
+object_name=hilowD1NZDUSD
 period_flags=0
-create_time=1635805604
-description=Adxm USDCHF : 21.390755
+create_time=1635828439
+description=hilowD1 AUDJPY : -78
 color=255
 font=Arial
 fontsize=10
@@ -965,7 +965,7 @@ y_distance=690
 <indicator>
 name=Custom Indicator
 <expert>
-name=ArraySort_Adx
+name=ArraySortHiLow
 flags=339
 window_num=0
 </expert>
