@@ -1,8 +1,8 @@
 <chart>
-id=132787622512752495
-symbol=AUDCAD
-period=60
-leftpos=2119
+id=132805146549688440
+symbol=EURCAD
+period=30
+leftpos=2155
 digits=4
 scale=32
 graph=1
@@ -19,10 +19,10 @@ days=1
 descriptions=0
 shift_size=20
 fixed_pos=0
-window_left=1259
-window_top=-1
-window_right=1475
-window_bottom=184
+window_left=549
+window_top=0
+window_right=764
+window_bottom=168
 window_type=1
 background_color=0
 foreground_color=16777215
@@ -43,9 +43,9 @@ fixed_height=0
 name=main
 <object>
 type=22
-object_name=Arrow 3435
+object_name=Arrow 418
 period_flags=0
-create_time=1635913067
+create_time=1636041122
 color=16776960
 weight=1
 background=0
@@ -55,28 +55,8 @@ filling=0
 selectable=1
 hidden=0
 zorder=0
-time_0=1635919200
-value_0=0.921845
-</object>
-<object>
-type=23
-object_name=Label 3928
-period_flags=0
-create_time=1635913560
-description=26
-color=16776960
-font=Arial
-fontsize=16
-angle=0
-anchor_pos=0
-background=0
-filling=0
-selectable=1
-hidden=0
-zorder=0
-corner=0
-x_distance=54
-y_distance=97
+time_0=1636047000
+value_0=1.436351
 </object>
 </indicator>
 <indicator>

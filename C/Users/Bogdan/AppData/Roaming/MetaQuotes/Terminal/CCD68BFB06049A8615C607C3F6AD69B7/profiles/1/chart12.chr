@@ -1,6 +1,6 @@
 <chart>
-id=132787622512752495
-symbol=AUDCAD
+id=132803894653765861
+symbol=AUDUSD
 period=60
 leftpos=2119
 digits=4
@@ -19,10 +19,10 @@ days=1
 descriptions=0
 shift_size=20
 fixed_pos=0
-window_left=1259
-window_top=-1
-window_right=1475
-window_bottom=184
+window_left=1263
+window_top=173
+window_right=1472
+window_bottom=360
 window_type=1
 background_color=0
 foreground_color=16777215
@@ -43,9 +43,9 @@ fixed_height=0
 name=main
 <object>
 type=22
-object_name=Arrow 3435
+object_name=Arrow 6266
 period_flags=0
-create_time=1635913067
+create_time=1635915898
 color=16776960
 weight=1
 background=0
@@ -55,14 +55,14 @@ filling=0
 selectable=1
 hidden=0
 zorder=0
-time_0=1635919200
-value_0=0.921845
+time_0=1635922800
+value_0=0.743050
 </object>
 <object>
 type=23
-object_name=Label 3928
+object_name=Label 6287
 period_flags=0
-create_time=1635913560
+create_time=1635915919
 description=26
 color=16776960
 font=Arial
@@ -75,8 +75,8 @@ selectable=1
 hidden=0
 zorder=0
 corner=0
-x_distance=54
-y_distance=97
+x_distance=53
+y_distance=98
 </object>
 </indicator>
 <indicator>
