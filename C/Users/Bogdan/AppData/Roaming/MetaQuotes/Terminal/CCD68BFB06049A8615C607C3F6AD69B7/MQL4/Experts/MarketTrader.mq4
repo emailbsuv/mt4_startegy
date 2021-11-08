@@ -15,7 +15,7 @@ int OnInit()
   {
    prevbar=Open[0];
    firststart=1;
-   int filehandle=FileOpen("contests1.txt",FILE_READ|FILE_TXT);
+   int filehandle=FileOpen("contests.txt",FILE_READ|FILE_TXT);
    FileSeek(filehandle,0,SEEK_SET);
    string tmp01;
    int tmp02=0;
@@ -90,28 +90,61 @@ double iCCI2(string symbol, int tf, int shift, int period_ma_slow, int period_ma
    for(i1=1; i1<period_ma_fast; i1++)
       ma_fast=ma_fast+iCCI(symbol,tf,cci_period,PRICE_TYPICAL,i1+shift);
    ma_fast=ma_fast/period_ma_fast;
-   return (MathAbs(ma_fast-ma_slow));
+   return (ma_fast-ma_slow);
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 int DeltaMasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period)
   {
-   int i;
-   double tmp1;
-   double prevtmp1=999999.0;
+   int i,tmp2=1;
+   double tmp1,tmp3=iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period);
+   double prevtmp1;
+   prevtmp1=MathAbs(tmp3);
+   if(tmp3<0)tmp2=-1;else tmp2=1;
+   tmp3=MathAbs(tmp3);
 
-   if(iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period)>iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period))
+   if(tmp3>MathAbs(iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period)))
       for(i=2; i<200; i++)
         {
          tmp1=iCCI2(symbol,tf,i,period_ma_slow,period_ma_fast,cci_period);
+         
+         tmp1=MathAbs(tmp1);
          if(prevtmp1<tmp1)
-            return (i);
+            return (i*tmp2);
          prevtmp1=tmp1;
         }
-   return (0);
+   return 0;
   }
+int Delta2MasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period)
+  {
+   int i,tmp2=1;
+   double tmp1,tmp3=iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period);
+   double prevtmp1;
+   prevtmp1=9999999;
+   if(tmp3<0)tmp2=-1;else tmp2=1;
+   //tmp3=MathAbs(tmp3);
 
+  // if(tmp3>MathAbs(iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period)))
+      for(i=0; i<200; i++)
+        {
+         tmp1=iCCI2(symbol,tf,i,period_ma_slow,period_ma_fast,cci_period);
+         
+         tmp1=MathAbs(tmp1);
+         if(prevtmp1<tmp1)
+            return (i*tmp2);
+         prevtmp1=tmp1;
+        }
+   return 0;
+  }
+int Delta2MasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period, int tf2, int period_ma_slow2, int period_ma_fast2, int cci_period2)
+  {
+    int masperiod1=DeltaMasLength(symbol, tf, period_ma_slow, period_ma_fast, cci_period);
+    int masperiod2=Delta2MasLength(symbol, tf2, period_ma_slow2, period_ma_fast2, cci_period2);
+    if( ((masperiod1<0) && (masperiod2<0)) || ((masperiod1>0) && (masperiod2>0)) )
+    if( (MathAbs(masperiod1)>9) && (MathAbs(masperiod2)>13)&& (MathAbs(masperiod2)<MathAbs(masperiod1)) ) return 1;
+    return 0;
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -120,10 +153,10 @@ void OnTick()
    int i1,i2,i3;
    double tmp001;
    
-   for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
    
-   if(prevbar==Open[0])return;
-   prevbar=Open[0];
+   if(prevbar==iOpen(NULL,15,0))return;
+   prevbar=iOpen(NULL,15,0);
+   for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
 
    for(i2=0;i2<cindex;i2++)
    for(i3=0;i3<StringToInteger(config[i2][0]);i3++)
@@ -134,43 +167,55 @@ void OnTick()
             if(OrderOpenTime()<(TimeCurrent()-StringToInteger(OrderComment()) ))
               {
                if(OrderType()==OP_BUY)
-                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close");}
+                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close "+OrderProfit());}
                else
-                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_ASK),3,Violet);Alert(config[i2][1]+" SELL Close");}
+                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_ASK),3,Violet);Alert(config[i2][1]+" SELL Close "+OrderProfit());}
               }
       }
      }
    int    res;
    
+   if(OrdersTotal()<511)
    for(i2=0;i2<cindex;i2++)
-   for(i3=0;i3<StringToInteger(config[i2][0]);i3++)   
+   for(i3=0;i3<StringToInteger(config[i2][0])-1;i3++)   
    if(CheckRestriction(config[i2][1], GetElement(config[i2][2+i3],5) )==0)
-   if(DeltaMasLength(config[i2][1],
+   if(Delta2MasLength(config[i2][1],
        StringToInteger(GetElement(config[i2][2+i3],0)),
        StringToInteger(GetElement(config[i2][2+i3],1)),
        StringToInteger(GetElement(config[i2][2+i3],2)),
-       StringToInteger(GetElement(config[i2][2+i3],3)))>9)
+       StringToInteger(GetElement(config[i2][2+i3],3)),
+       StringToInteger(GetElement(config[i2][2+i3+1],0)),
+       StringToInteger(GetElement(config[i2][2+i3+1],1)),
+       StringToInteger(GetElement(config[i2][2+i3+1],2)),
+       StringToInteger(GetElement(config[i2][2+i3+1],3)))==1)
      {
 
       double tmp04=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),3,0,MODE_SMA,PRICE_CLOSE,1);
       double tmp05=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),3,0,MODE_SMA,PRICE_CLOSE,0);
+      double takeprofit = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
+      //if(!IsTesting())
+      takeprofit=20*MarketInfo(config[i2][1],MODE_POINT);
       if(tmp04>tmp05)
         {
-         res=-1;while(res==-1){
-            res=OrderSend(config[i2][1],OP_SELL,0.01,MarketInfo(config[i2][1],MODE_BID),3,0,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT),GetElement(config[i2][2+i3],5),0,0,Red);
-            //res=OrderSend(cindex[i2][1],OP_SELLLIMIT,0.01,Bid+GetElement(config[i2][2+i3],4)*Point/2,3,0,Bid-GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Red);
-         //Print("ERROR: "+GetLastError());
-            Sleep(1000);}
+         for(i1=0;i1<1;i1++){
+            res=-1;while(res==-1){
+               res=OrderSend(config[i2][1],OP_SELL,0.01,MarketInfo(config[i2][1],MODE_BID),3,0,MarketInfo(config[i2][1],MODE_BID)-takeprofit,GetElement(config[i2][2+i3],5),0,0,Red);
+               //res=OrderSend(cindex[i2][1],OP_SELLLIMIT,0.01,Bid+GetElement(config[i2][2+i3],4)*Point/2,3,0,Bid-GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Red);
+            //Print("ERROR: "+GetLastError());
+               Sleep(1000);}
+         }
          Alert(config[i2][1]+" SELL");
         }
 
       if(tmp04<tmp05)
         {
-         res=-1; while(res==-1){
-            res=OrderSend(config[i2][1],OP_BUY,0.01,MarketInfo(config[i2][1],MODE_ASK),3,0,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT),GetElement(config[i2][2+i3],5),0,0,Blue);
-            //res=OrderSend(cindex[i2][1],OP_BUYLIMIT,0.01,Ask-GetElement(config[i2][2+i3],4)*Point/2,3,0,Ask+GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Blue);
-         //Print("ERROR: "+GetLastError());   
-            Sleep(1000);}
+         for(i1=0;i1<1;i1++){
+            res=-1; while(res==-1){
+               res=OrderSend(config[i2][1],OP_BUY,0.01,MarketInfo(config[i2][1],MODE_ASK),3,0,MarketInfo(config[i2][1],MODE_ASK)+takeprofit,GetElement(config[i2][2+i3],5),0,0,Blue);
+               //res=OrderSend(cindex[i2][1],OP_BUYLIMIT,0.01,Ask-GetElement(config[i2][2+i3],4)*Point/2,3,0,Ask+GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Blue);
+            //Print("ERROR: "+GetLastError());   
+               Sleep(1000);}
+         }
          Alert(config[i2][1]+" BUY");
         }
      }
@@ -178,4 +223,3 @@ void OnTick()
   }
 
 //+------------------------------------------------------------------+
-//if(OrderComment()==GetElement(config[i2][2+i3],5))

@@ -1,8 +1,8 @@
 <chart>
 id=132787622512150714
-symbol=EURCHF
-period=30
-leftpos=2151
+symbol=USDCHF
+period=1440
+leftpos=1038
 digits=4
 scale=8
 graph=1

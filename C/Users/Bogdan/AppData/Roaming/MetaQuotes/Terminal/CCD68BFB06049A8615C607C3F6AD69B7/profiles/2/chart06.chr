@@ -1,8 +1,8 @@
 <chart>
-id=132805155088532886
-symbol=EURAUD
-period=30
-leftpos=2155
+id=132805155088532887
+symbol=EURUSD
+period=5
+leftpos=2052
 digits=4
 scale=32
 graph=1
@@ -19,10 +19,10 @@ days=1
 descriptions=0
 shift_size=20
 fixed_pos=0
-window_left=758
-window_top=-1
-window_right=968
-window_bottom=169
+window_left=382
+window_top=162
+window_right=731
+window_bottom=332
 window_type=1
 background_color=0
 foreground_color=16777215
@@ -41,23 +41,6 @@ height=148
 fixed_height=0
 <indicator>
 name=main
-<object>
-type=22
-object_name=Arrow 1255
-period_flags=0
-create_time=1636041959
-color=255
-weight=1
-background=0
-symbol_code=242
-anchor_pos=0
-filling=0
-selectable=1
-hidden=0
-zorder=0
-time_0=1636048800
-value_0=1.562874
-</object>
 </indicator>
 <indicator>
 name=Custom Indicator
@@ -80,5 +63,11 @@ period_flags=0
 show_data=1
 </indicator>
 </window>
+
+<expert>
+name=MarketTrader
+flags=343
+window_num=0
+</expert>
 </chart>
 

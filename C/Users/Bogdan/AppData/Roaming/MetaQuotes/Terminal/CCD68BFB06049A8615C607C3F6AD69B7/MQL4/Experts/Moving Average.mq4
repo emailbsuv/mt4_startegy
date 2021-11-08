@@ -32,10 +32,11 @@ double iCCI2(int shift){
 }
 int DeltaMasLength(){
   int i;
-  double tmp1;
-  double prevtmp1=999999.0;
-
-  if(iCCI2(1)>iCCI2(0))     
+  double tmp1,tmp2;
+  double prevtmp1=iCCI2(1);
+  tmp2=prevtmp1;
+  
+  if(tmp2>iCCI2(0))     
   for(i=2; i<200; i++){
      tmp1=iCCI2(i);
      if(prevtmp1<tmp1)return (i);
@@ -56,7 +57,8 @@ void OnTick()
 //        ((OrderOpenTime()<(TimeCurrent()-1440*60*16*4)) && Period()==240) 
 //        
 //        )
-    if((OrderOpenTime()<(TimeCurrent()-60*60*4*4)) && Period()<15)
+    if((OrderOpenTime()<(TimeCurrent()-1440*60)) && Period()<60)
+    //if((OrderOpenTime()<(TimeCurrent()-1440*60*2)) && Period()<1440)
     {
      if(OrderType()==OP_BUY)OrderClose(OrderTicket(),OrderLots(),Bid,3,Violet);else OrderClose(OrderTicket(),OrderLots(),Ask,3,Violet);
     }
@@ -68,7 +70,7 @@ if((lastorder==OP_BUY) || (firststart==1))
   //if(iHighest(NULL,0,MODE_HIGH,25,0)<11)
   if((DeltaMasLength()>9) && (iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,1)>iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,0)) )
      {
-      res=OrderSend(Symbol(),OP_SELL,0.01,Bid,3,0,Bid-4000*Point,"",0,0,Red);
+      res=OrderSend(Symbol(),OP_SELL,0.01,Bid,3,0,Bid-6000*Point,"",0,0,Red);
       lastorder=OP_SELL;
       firststart=0;
       //res=OrderSend(Symbol(),OP_SELLLIMIT,0.01,Bid+30*Point,3,0,Bid-30*Point,"",0,TimeCurrent()+1440*60/2,Red);
@@ -81,7 +83,7 @@ if((lastorder==OP_SELL) || (firststart==1))
   //if(iLowest(NULL,0,MODE_LOW,25,0)<11)
   if((DeltaMasLength()>9) && (iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,1)<iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,0)) )
      {
-      res=OrderSend(Symbol(),OP_BUY,0.01,Ask,3,0,Ask+4000*Point,"",0,0,Blue);
+      res=OrderSend(Symbol(),OP_BUY,0.01,Ask,3,0,Ask+6000*Point,"",0,0,Blue);
       lastorder=OP_BUY;
       firststart=0;
       //res=OrderSend(Symbol(),OP_BUYLIMIT,0.01,Ask-30*Point,3,0,Ask+30*Point,"",0,TimeCurrent()+1440*60/2,Blue);

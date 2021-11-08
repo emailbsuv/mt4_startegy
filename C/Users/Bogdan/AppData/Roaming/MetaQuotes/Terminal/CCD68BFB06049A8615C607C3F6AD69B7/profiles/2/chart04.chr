@@ -1,9 +1,9 @@
 <chart>
-id=132805143741523178
-symbol=AUDCAD
-period=15
-leftpos=2365
-digits=4
+id=132805155088532898
+symbol=NZDJPY
+period=1440
+leftpos=1042
+digits=2
 scale=32
 graph=1
 fore=1
@@ -19,10 +19,10 @@ days=1
 descriptions=0
 shift_size=20
 fixed_pos=0
-window_left=372
-window_top=2
-window_right=603
-window_bottom=168
+window_left=576
+window_top=4
+window_right=786
+window_bottom=174
 window_type=1
 background_color=0
 foreground_color=16777215
@@ -43,20 +43,20 @@ fixed_height=0
 name=main
 <object>
 type=22
-object_name=Arrow 102
+object_name=Arrow 22600
 period_flags=0
-create_time=1636040806
-color=16776960
+create_time=1636063304
+color=255
 weight=1
 background=0
-symbol_code=241
+symbol_code=242
 anchor_pos=0
 filling=0
 selectable=1
 hidden=0
 zorder=0
-time_0=1636047900
-value_0=0.919750
+time_0=1636070400
+value_0=81.796117
 </object>
 </indicator>
 <indicator>
