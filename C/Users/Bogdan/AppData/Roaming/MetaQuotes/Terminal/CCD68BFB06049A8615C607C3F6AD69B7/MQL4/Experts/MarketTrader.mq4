@@ -116,7 +116,7 @@ int DeltaMasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast
         }
    return 0;
   }
-int Delta2MasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period)
+int Delta3MasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period)
   {
    int i,tmp2=1;
    double tmp1,tmp3=iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period);
@@ -140,10 +140,14 @@ int Delta2MasLength(string symbol, int tf, int period_ma_slow, int period_ma_fas
 int Delta2MasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period, int tf2, int period_ma_slow2, int period_ma_fast2, int cci_period2)
   {
     int masperiod1=DeltaMasLength(symbol, tf, period_ma_slow, period_ma_fast, cci_period);
-    int masperiod2=Delta2MasLength(symbol, tf2, period_ma_slow2, period_ma_fast2, cci_period2);
-    if( ((masperiod1<0) && (masperiod2<0)) || ((masperiod1>0) && (masperiod2>0)) )
-    if( (MathAbs(masperiod1)>9) && (MathAbs(masperiod2)>13)&& (MathAbs(masperiod2)<MathAbs(masperiod1)) ) return 1;
-    return 0;
+    int masperiod2=Delta3MasLength(symbol, tf2, period_ma_slow2, period_ma_fast2, cci_period2);
+    //if( ((masperiod1<0) && (masperiod2<0)) || ((masperiod1>0) && (masperiod2>0)) )
+    //if( (MathAbs(masperiod1)>9) && (MathAbs(masperiod2)>13)&& (MathAbs(masperiod2)<MathAbs(masperiod1)) ) return 1;
+    if( (MathAbs(masperiod1)>9) && (MathAbs(masperiod2)>9) ){
+       if((masperiod1<0) && (masperiod2<0)) return OP_BUY;
+       if((masperiod1>0) && (masperiod2>0)) return OP_SELL;
+    }
+    return -1;
   }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -177,25 +181,32 @@ void OnTick()
    
    if(OrdersTotal()<511)
    for(i2=0;i2<cindex;i2++)
-   for(i3=0;i3<StringToInteger(config[i2][0])-1;i3++)   
+   for(i3=0;i3<StringToInteger(config[i2][0]);i3++)   
    if(CheckRestriction(config[i2][1], GetElement(config[i2][2+i3],5) )==0)
-   if(Delta2MasLength(config[i2][1],
+   if(StringToInteger(GetElement(config[i2][2+i3],1))>0)
+   //if(Delta2MasLength(config[i2][1],
+   //    StringToInteger(GetElement(config[i2][2+i3],0)),
+   //    StringToInteger(GetElement(config[i2][2+i3],1)),
+   //    StringToInteger(GetElement(config[i2][2+i3],2)),
+   //    StringToInteger(GetElement(config[i2][2+i3],3)),
+   //    StringToInteger(GetElement(config[i2][2+i3+1],0)),
+   //    StringToInteger(GetElement(config[i2][2+i3+1],1)),
+   //    StringToInteger(GetElement(config[i2][2+i3+1],2)),
+   //    StringToInteger(GetElement(config[i2][2+i3+1],3)))==1)
+     {
+      int signal=DeltaMasLength(config[i2][1],
        StringToInteger(GetElement(config[i2][2+i3],0)),
        StringToInteger(GetElement(config[i2][2+i3],1)),
        StringToInteger(GetElement(config[i2][2+i3],2)),
-       StringToInteger(GetElement(config[i2][2+i3],3)),
-       StringToInteger(GetElement(config[i2][2+i3+1],0)),
-       StringToInteger(GetElement(config[i2][2+i3+1],1)),
-       StringToInteger(GetElement(config[i2][2+i3+1],2)),
-       StringToInteger(GetElement(config[i2][2+i3+1],3)))==1)
-     {
-
-      double tmp04=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),3,0,MODE_SMA,PRICE_CLOSE,1);
-      double tmp05=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),3,0,MODE_SMA,PRICE_CLOSE,0);
+       StringToInteger(GetElement(config[i2][2+i3],3)));
+      if(MathAbs(signal)<18)continue; 
+      double tmp04=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,1);
+      double tmp05=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,0);
       double takeprofit = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
       //if(!IsTesting())
-      takeprofit=20*MarketInfo(config[i2][1],MODE_POINT);
+      //takeprofit=25*MarketInfo(config[i2][1],MODE_POINT);
       if(tmp04>tmp05)
+      //if(signal==OP_SELL)
         {
          for(i1=0;i1<1;i1++){
             res=-1;while(res==-1){
@@ -208,6 +219,7 @@ void OnTick()
         }
 
       if(tmp04<tmp05)
+      //if(signal==OP_BUY)
         {
          for(i1=0;i1<1;i1++){
             res=-1; while(res==-1){
