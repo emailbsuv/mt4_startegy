@@ -26,10 +26,10 @@
 #define PRICE_WEIGHTED 6
 
 int bars = 1500;
-int randcycles=40;
+int randcycles=400;
 int tfdeptf=2;
 const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
-const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests.txt";
+const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests1.txt";
 
 struct mdata{
 	long int ctm[2000];
@@ -307,7 +307,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout, const
 		int t1=2,t2=1;
 		while(t1>=t2){t1=rand(8,24);t2=rand(24,222);}
 		testerresult = testerstart(tf,point,timeout,t1,t2,rand(55,222));
-		if( (testerresult->profitcntpoints > profitcntpoints) && (testerresult->profitcntorders > (testerresult->notprofitcntorders *3)) ){
+		if( ((testerresult->profitcntorders-testerresult->notprofitcntorders)>(profitcntpoints-notprofitcntorders)) && (testerresult->profitcntorders >4) && (testerresult->profitcntorders>(testerresult->notprofitcntorders*3))){
 		//if(testerresult->profitcntorders > profitcntorders){
 			profitcntpoints = testerresult->profitcntpoints;
 			period_ma_fast = testerresult->period_ma_fast;
