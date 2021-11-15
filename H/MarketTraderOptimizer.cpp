@@ -27,10 +27,10 @@
 #define PRICE_WEIGHTED 6
 
 int bars = 1500;
-int randcycles=4;
-int tfdeptf=2;
+int randcycles=50;
+int tfdeptf=5;
 const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
-const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests1.txt";
+const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests.txt";
 
 struct mdata{
 	long int ctm[2000];
@@ -233,14 +233,16 @@ double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,in
    for(i1=1; i1<period_ma_fast; i1++)
       ma_fast=ma_fast+cci(cci_period,i1+shift,tcurbar);
    ma_fast=ma_fast/period_ma_fast;
-   return (fabs(ma_fast-ma_slow));	
+   return (ma_fast-ma_slow);	
 }
 int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
-	double tmp1,tmp2,prevtmp1=icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp2=prevtmp1;
-	if(tmp2>icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar))
+	double tmp1,tmp2,tmp3,prevtmp1=icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+	if(tmp3<0)tmp2=-1;else tmp2=1;
+    prevtmp1=tmp3=fabs(tmp3);
+	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
 		for(int i1=2;i1<200;i1++){
-			tmp1=icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar);
-			if(prevtmp1<tmp1) return i1;
+			tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+			if(prevtmp1<tmp1) return (i1*tmp2);
 			prevtmp1=tmp1;
 		}
 	return 0;
@@ -270,7 +272,8 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 		}
 		tcurbar=i;
 		if((openorder==0)||(openorder==-1)){
-			if((DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar)>9) && (sma(3,PRICE_CLOSE,1,tcurbar)>sma(3,PRICE_CLOSE,0,tcurbar))){
+			int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
+			if((abs(signal)>9) && (signal>0)){
 				openorder=OP_SELL;
 				openorderclosed=0;
 				openorderprice=testermetadata->open[i];
@@ -278,7 +281,8 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 			}
 		}else
 		if((openorder==1)||(openorder==-1)){
-			if((DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar)>9) && (sma(3,PRICE_CLOSE,1,tcurbar)<sma(3,PRICE_CLOSE,0,tcurbar))){
+			int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
+			if((abs(signal)>9) && (signal<0)){
 				openorder=OP_BUY;
 				openorderclosed=0;
 				openorderprice=testermetadata->open[i];
@@ -547,7 +551,7 @@ void SaveConfig(){
 	delete[] membuf;	
 }
 int main(int argc, char *argv[]){
-	
+	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
 	double title1,dt0=time(NULL);
 	rdtsc();
 	srand(time(0));
@@ -561,20 +565,21 @@ int main(int argc, char *argv[]){
 
 	ReadConfig();
 	
-	for(int i1=0;i1<cindex;i1++)
+	for(int i1=0;i1<cindex;i1++){
+		printf("\r\n");printf(&config[i1][1][0]);printf("\r\n");
 		for(int i2=0;i2<strToInt(&config[i1][0][0]);i2++)
 		if(i2<tfdeptf){
-    //lstrcat(stm1,"EURUSD\r\n");
-	//lstrcat(stm1,optimize("EURUSD","60","86401","25"));lstrcat(stm1,"\r\n");
 			memset(tf,0,5);memset(timeout,0,10);memset(takeprofit,0,10);memset(optresult,0,100);
 			lstrcat(tf,GetElement(&config[i1][i2+2][0],0));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
 			lstrcat(takeprofit,GetElement(&config[i1][i2+2][0],4));
 			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout,takeprofit));
-			printf(&config[i1][1][0]);printf(" ");printf(tf);printf(" : ");printf(optresult);printf("\r\n");
+			printf(optresult);printf("\r\n");
 			PatchConfig(&config[i1][1][0],optresult);
+		}else {
+			printf(&config[i1][i2+2][0]);printf("\r\n");
 		}
-
+	}
 	SaveConfig();
 /* 	lstrcat(stm1,gmtimeToStr(testermetadata->ctm[bars-1]));lstrcat(stm1,"\r\n");
 	lstrcat(stm1,doubleToStr(testermetadata->open[bars-1],4));lstrcat(stm1,"\r\n");

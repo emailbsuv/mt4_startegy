@@ -158,8 +158,8 @@ void OnTick()
    double tmp001;
    
    
-   if(prevbar==iOpen(NULL,15,0))return;
-   prevbar=iOpen(NULL,15,0);
+   if(prevbar==iOpen(NULL,5,0))return;
+   prevbar=iOpen(NULL,5,0);
    for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
 
    for(i2=0;i2<cindex;i2++)
@@ -200,13 +200,13 @@ void OnTick()
        StringToInteger(GetElement(config[i2][2+i3],2)),
        StringToInteger(GetElement(config[i2][2+i3],3)));
       if(MathAbs(signal)<18)continue; 
-      double tmp04=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,1);
-      double tmp05=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,0);
+      //double tmp04=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,1);
+      //double tmp05=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,0);
       double takeprofit = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
       //if(!IsTesting())
       //takeprofit=25*MarketInfo(config[i2][1],MODE_POINT);
-      if(tmp04>tmp05)
-      //if(signal==OP_SELL)
+      //if(tmp04>tmp05)
+      if(signal>0)
         {
          for(i1=0;i1<1;i1++){
             res=-1;while(res==-1){
@@ -218,8 +218,8 @@ void OnTick()
          Alert(config[i2][1]+" SELL");
         }
 
-      if(tmp04<tmp05)
-      //if(signal==OP_BUY)
+      //if(tmp04<tmp05)
+      if(signal<0)
         {
          for(i1=0;i1<1;i1++){
             res=-1; while(res==-1){

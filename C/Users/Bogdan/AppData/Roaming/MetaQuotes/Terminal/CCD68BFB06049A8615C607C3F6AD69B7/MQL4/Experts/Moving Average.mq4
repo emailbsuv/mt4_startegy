@@ -202,7 +202,7 @@ void OnTick()
      {
       if((DeltaMasLength()>9) && (iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,1)>iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,0)))
         {
-         res=OrderSend(Symbol(),OP_SELL,0.01,Bid,3,0,Bid-25*Point,"",0,0,Red);
+         res=OrderSend(Symbol(),OP_SELL,0.01,Bid,3,0,Bid-600000*Point,"",0,0,Red);
          lastorder=OP_SELL;
          firststart=0;
         }
@@ -213,7 +213,7 @@ void OnTick()
      {
       if((DeltaMasLength()>9) && (iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,1)<iMA(NULL,0,3,0,MODE_SMA,PRICE_CLOSE,0)))
         {
-         res=OrderSend(Symbol(),OP_BUY,0.01,Ask,3,0,Ask+25*Point,"",0,0,Blue);
+         res=OrderSend(Symbol(),OP_BUY,0.01,Ask,3,0,Ask+600000*Point,"",0,0,Blue);
          lastorder=OP_BUY;
          firststart=0;
         }
