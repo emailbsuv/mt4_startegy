@@ -98,14 +98,17 @@ double iCCI2(string symbol, int tf, int shift, int period_ma_slow, int period_ma
 int DeltaMasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast, int cci_period)
   {
    int i,tmp2=1;
-   double tmp1,tmp3=iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period);
+   double tmp1,tmp3=iCCI2(symbol,tf,2,period_ma_slow,period_ma_fast,cci_period);
+   double tmp4=MathAbs(iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period));
+   double tmp5=MathAbs(iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period));
    double prevtmp1;
    prevtmp1=MathAbs(tmp3);
    if(tmp3<0)tmp2=-1;else tmp2=1;
    tmp3=MathAbs(tmp3);
 
-   if(tmp3>MathAbs(iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period)))
-      for(i=2; i<200; i++)
+   if(tmp4<=tmp5)
+   if(tmp3>tmp5)
+      for(i=3; i<200; i++)
         {
          tmp1=iCCI2(symbol,tf,i,period_ma_slow,period_ma_fast,cci_period);
          
