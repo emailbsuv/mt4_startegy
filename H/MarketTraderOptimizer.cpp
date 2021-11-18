@@ -5,6 +5,9 @@
 #include <math.h>
 #include <time.h>
 #include <windows.h>
+#include <Mmsystem.h>
+
+#pragma comment(lib, "Winmm.lib")
 
 #define MODE_TRADES 0
 #define MODE_HISTORY 1
@@ -596,8 +599,8 @@ int main(int argc, char *argv[]){
 	lstrcat(stm1,doubleToStr(title1,1));
 	lstrcat(stm1," minutes used");
 	printf(stm1);
-	//PlaySoundA((LPCSTR) "opcomplete.wav", NULL, SND_FILENAME | SND_ASYNC);
-	MessageBeep(MB_OK);
+	PlaySoundA((LPCSTR) "opcomplete.wav", NULL, SND_FILENAME | SND_ASYNC);
+	//MessageBeep(MB_OK);
     free(stm1);
 	delete[] testermetadata;
 	

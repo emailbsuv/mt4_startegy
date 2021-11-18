@@ -1,1 +1,1 @@
-g++ -msse -mtune=pentium3 -mfpmath=sse -mno-mmx MarketTraderOptimizer.cpp -o MarketTraderOptimizer.exe
+g++ -msse -mtune=pentium3 -mfpmath=sse -mno-mmx MarketTraderOptimizer.cpp -o MarketTraderOptimizer.exe -lWinmm
