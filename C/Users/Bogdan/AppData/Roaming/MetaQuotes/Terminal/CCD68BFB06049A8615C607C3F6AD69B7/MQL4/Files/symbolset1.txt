@@ -1,0 +1,12 @@
+#Bitcoin
+#Ethereum
+#Litecoin
+#Ripple
+Doge
+Filecoin
+Cardano
+BCHUSD
+Chainlink
+Polkadot
+Solana
+Uniswap

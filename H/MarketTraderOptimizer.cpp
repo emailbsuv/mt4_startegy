@@ -28,9 +28,9 @@
 
 int bars = 1500;
 int randcycles=50;
-int tfdeptf=5;
+int tfdeptf=2;
 const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
-const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests.txt";
+const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests1.txt";
 
 struct mdata{
 	long int ctm[2000];
@@ -226,12 +226,12 @@ double loadHST(const char* symbol,const char* tf){
 double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
    double ma_fast,ma_slow;
    int i1;
-   ma_fast=ma_slow=cci(cci_period,shift,tcurbar);
+   ma_fast=ma_slow=cci(cci_period,shift,tcurbar)+10000.0;
    for(i1=1; i1<period_ma_slow; i1++)
-      ma_slow=ma_slow+cci(cci_period,i1+shift,tcurbar);
+      ma_slow=ma_slow+cci(cci_period,i1+shift,tcurbar)+10000.0;
    ma_slow=ma_slow/period_ma_slow;
    for(i1=1; i1<period_ma_fast; i1++)
-      ma_fast=ma_fast+cci(cci_period,i1+shift,tcurbar);
+      ma_fast=ma_fast+cci(cci_period,i1+shift,tcurbar)+10000.0;
    ma_fast=ma_fast/period_ma_fast;
    return (ma_fast-ma_slow);	
 }
@@ -350,6 +350,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout, const
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
+	int tp;
 
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
@@ -394,11 +395,13 @@ const char* testertest(const char* ctf,double point, const char* ctimeout, const
 		}
 	}
 
+	tp = strToInt(takeprofit);
+	if(profitcntorders>0)tp = (int)(profitcntpoints/profitcntorders/2.0);
 	lstrcat(itemconfig,ctf);lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_fast));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_slow));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(cci_period));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,takeprofit);lstrcat(itemconfig," ");
+	lstrcat(itemconfig,intToStr(tp));lstrcat(itemconfig," ");//takeprofit
 	lstrcat(itemconfig,ctimeout);lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(profitcntpoints));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(notprofitcntorders));lstrcat(itemconfig," ");	

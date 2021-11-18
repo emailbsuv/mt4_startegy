@@ -13,9 +13,9 @@ int cindex,cindex1=0,cindex2=1;
 double prevbar;
 int OnInit()
   {
-   prevbar=Open[0];
+   prevbar=iOpen(NULL,1,0);
    firststart=1;
-   int filehandle=FileOpen("contests.txt",FILE_READ|FILE_TXT);
+   int filehandle=FileOpen("contests1.txt",FILE_READ|FILE_TXT);
    FileSeek(filehandle,0,SEEK_SET);
    string tmp01;
    int tmp02=0;
@@ -83,12 +83,12 @@ double iCCI2(string symbol, int tf, int shift, int period_ma_slow, int period_ma
   {
    double ma_fast,ma_slow;
    int i1;
-   ma_fast=ma_slow=iCCI(symbol,tf,cci_period,PRICE_TYPICAL,shift);
+   ma_fast=ma_slow=iCCI(symbol,tf,cci_period,PRICE_TYPICAL,shift)+10000.0;
    for(i1=1; i1<period_ma_slow; i1++)
-      ma_slow=ma_slow+iCCI(symbol,tf,cci_period,PRICE_TYPICAL,i1+shift);
+      ma_slow=ma_slow+iCCI(symbol,tf,cci_period,PRICE_TYPICAL,i1+shift)+10000.0;
    ma_slow=ma_slow/period_ma_slow;
    for(i1=1; i1<period_ma_fast; i1++)
-      ma_fast=ma_fast+iCCI(symbol,tf,cci_period,PRICE_TYPICAL,i1+shift);
+      ma_fast=ma_fast+iCCI(symbol,tf,cci_period,PRICE_TYPICAL,i1+shift)+10000.0;
    ma_fast=ma_fast/period_ma_fast;
    return (ma_fast-ma_slow);
   }
@@ -161,8 +161,8 @@ void OnTick()
    double tmp001;
    
    
-   if(prevbar==iOpen(NULL,5,0))return;
-   prevbar=iOpen(NULL,5,0);
+   if(prevbar==iOpen(NULL,1,0))return;
+   prevbar=iOpen(NULL,1,0);
    for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
 
    for(i2=0;i2<cindex;i2++)
