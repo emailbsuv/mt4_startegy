@@ -29,11 +29,11 @@
 #define PRICE_TYPICAL 5
 #define PRICE_WEIGHTED 6
 
-int bars = 1500;
+int bars = 1500;//1070
 int randcycles=50;
 int tfdeptf=5;
 const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
-const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests1.txt";
+const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests.txt";
 
 struct mdata{
 	long int ctm[2000];
@@ -257,7 +257,7 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 	double openorderprice;
 	int tcurbar;
 	tresults* result = new tresults[1];
-	for(int i=350;i<bars;i++){
+	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
 			int profitorder = (int)((testermetadata->close[i]-openorderprice)/point);
 			if( ((profitorder>0)&&(openorder==OP_BUY)) || ((profitorder<0)&&(openorder==OP_SELL)) )profitcntorders++;
@@ -276,7 +276,7 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 		tcurbar=i;
 		if((openorder==0)||(openorder==-1)){
 			int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-			if((abs(signal)>9) && (signal>0)){
+			if((abs(signal)>19) && (signal>0)){
 				openorder=OP_SELL;
 				openorderclosed=0;
 				openorderprice=testermetadata->open[i];
@@ -285,7 +285,7 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 		}else
 		if((openorder==1)||(openorder==-1)){
 			int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-			if((abs(signal)>9) && (signal<0)){
+			if((abs(signal)>19) && (signal<0)){
 				openorder=OP_BUY;
 				openorderclosed=0;
 				openorderprice=testermetadata->open[i];
@@ -329,7 +329,6 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 		while(t1>=t2){t1=rand(8,24);t2=rand(24,222);}
 		testerresult[0] = testerstart(tf,thread.point,timeout,t1,t2,rand(55,222));
 		if( ((testerresult->profitcntorders-testerresult->notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult->profitcntorders >4) && (testerresult->profitcntorders>(testerresult->notprofitcntorders*3))){
-		//if(testerresult->profitcntorders > profitcntorders){
 			profitcntpoints = testerresult->profitcntpoints;
 			period_ma_fast = testerresult->period_ma_fast;
 			period_ma_slow = testerresult->period_ma_slow;
@@ -399,7 +398,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout, const
 	}
 
 	tp = strToInt(takeprofit);
-	if(profitcntorders>0)tp = (int)(profitcntpoints/profitcntorders/2.0);
+	if(profitcntorders>0)tp = (int)(profitcntpoints/profitcntorders/1.5);
 	lstrcat(itemconfig,ctf);lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_fast));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_slow));lstrcat(itemconfig," ");
@@ -599,8 +598,8 @@ int main(int argc, char *argv[]){
 	lstrcat(stm1,doubleToStr(title1,1));
 	lstrcat(stm1," minutes used");
 	printf(stm1);
-	PlaySoundA((LPCSTR) "opcomplete.wav", NULL, SND_FILENAME | SND_ASYNC);
-	//MessageBeep(MB_OK);
+	//PlaySoundA((LPCSTR) "opcomplete.wav", NULL, SND_FILENAME | SND_ASYNC);
+	MessageBeep(MB_OK);
     free(stm1);
 	delete[] testermetadata;
 	

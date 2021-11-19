@@ -13,7 +13,7 @@ int cindex,cindex1=0,cindex2=1;
 double prevbar;
 int OnInit()
   {
-   prevbar=iOpen(NULL,1,0);
+   prevbar=iOpen(NULL,5,0);
    firststart=1;
    int filehandle=FileOpen("contests1.txt",FILE_READ|FILE_TXT);
    FileSeek(filehandle,0,SEEK_SET);
@@ -161,8 +161,8 @@ void OnTick()
    double tmp001;
    
    
-   if(prevbar==iOpen(NULL,1,0))return;
-   prevbar=iOpen(NULL,1,0);
+   if(prevbar==iOpen(NULL,5,0))return;
+   prevbar=iOpen(NULL,5,0);
    for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
 
    for(i2=0;i2<cindex;i2++)
@@ -202,18 +202,15 @@ void OnTick()
        StringToInteger(GetElement(config[i2][2+i3],1)),
        StringToInteger(GetElement(config[i2][2+i3],2)),
        StringToInteger(GetElement(config[i2][2+i3],3)));
-      if(MathAbs(signal)<18)continue; 
-      //double tmp04=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,1);
-      //double tmp05=iMA(config[i2][1],StringToInteger(GetElement(config[i2][2+i3],0)),4,0,MODE_SMA,PRICE_CLOSE,0);
+      if(MathAbs(signal)<21)continue; 
       double takeprofit = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
-      //if(!IsTesting())
-      //takeprofit=25*MarketInfo(config[i2][1],MODE_POINT);
-      //if(tmp04>tmp05)
+
       if(signal>0)
         {
          for(i1=0;i1<1;i1++){
             res=-1;while(res==-1){
                res=OrderSend(config[i2][1],OP_SELL,0.01,MarketInfo(config[i2][1],MODE_BID),3,0,MarketInfo(config[i2][1],MODE_BID)-takeprofit,GetElement(config[i2][2+i3],5),0,0,Red);
+               //res=OrderSend(config[i2][1],OP_BUYSTOP,0.01,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Blue);
                //res=OrderSend(cindex[i2][1],OP_SELLLIMIT,0.01,Bid+GetElement(config[i2][2+i3],4)*Point/2,3,0,Bid-GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Red);
             //Print("ERROR: "+GetLastError());
                Sleep(1000);}
@@ -221,12 +218,12 @@ void OnTick()
          Alert(config[i2][1]+" SELL");
         }
 
-      //if(tmp04<tmp05)
       if(signal<0)
         {
          for(i1=0;i1<1;i1++){
             res=-1; while(res==-1){
                res=OrderSend(config[i2][1],OP_BUY,0.01,MarketInfo(config[i2][1],MODE_ASK),3,0,MarketInfo(config[i2][1],MODE_ASK)+takeprofit,GetElement(config[i2][2+i3],5),0,0,Blue);
+               //res=OrderSend(config[i2][1],OP_SELLSTOP,0.01,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Red);
                //res=OrderSend(cindex[i2][1],OP_BUYLIMIT,0.01,Ask-GetElement(config[i2][2+i3],4)*Point/2,3,0,Ask+GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Blue);
             //Print("ERROR: "+GetLastError());   
                Sleep(1000);}
