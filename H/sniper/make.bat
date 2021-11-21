@@ -1,0 +1,1 @@
+g++ -m64 -mfpmath=sse -msse4.2 -mavx -march=sandybridge -mno-mmx -mtune=sandybridge Sniper.cpp -o Sniper.exe -lWinmm -w

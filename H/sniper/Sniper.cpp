@@ -29,13 +29,14 @@
 #define PRICE_TYPICAL 5
 #define PRICE_WEIGHTED 6
 
-int bars = 1200;//1200//1500
-int tfdeptf=5;
 const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests1.txt";
+const char* pathRESULTS = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\results1.txt";
 
 
-const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
+int bars = 1070;//1070//1500
 int randcycles=50;
+int tfdeptf=5;
+const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
 
 struct mdata{
 	long int ctm[2000];
@@ -48,12 +49,10 @@ struct mdata{
 mdata* testermetadata;
 
 struct tresults{
-	int profitcntorders;
-	int period_ma_fast;
-	int period_ma_slow;
-	int cci_period;
-	int profitcntpoints;
-	int notprofitcntorders;
+	int openorder;
+	double orderprofit;
+	double orderopentime;
+	double nullbartime;
 };
 
 int testercurbar;
@@ -241,181 +240,101 @@ double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,in
    return (ma_fast-ma_slow);	
 }
 int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
-	double tmp1,tmp2,tmp3,prevtmp1=icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+	double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
+	
+	if(tmp4<=tmp5)
 	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
-		for(int i1=2;i1<200;i1++){
+		for(int i1=3;i1<200;i1++){
 			tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 			if(prevtmp1<tmp1) return (i1*tmp2);
 			prevtmp1=tmp1;
 		}
 	return 0;
 }
-//tresults* 
-tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period){
-	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
-	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0;
-	double openorderprice;
-	int tcurbar;
+tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int takeprofit){
+	int openorder=-1,timeout=(int)(172800/tf/60);
+	if(tf>240)timeout*=3;
+	double orderprofit=0.0,orderopentime=0,nullbartime=0,orderopenprice=0.0;
+	int tcurbar,i1;
 	tresults* result = new tresults[1];
-	for(int i=250;i<bars;i++){
-		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorder = (int)((testermetadata->close[i]-openorderprice)/point);
-			if( ((profitorder>0)&&(openorder==OP_BUY)) || ((profitorder<0)&&(openorder==OP_SELL)) )profitcntorders++;
-			if((profitorder>0)&&(openorder==OP_BUY))profitcntpoints+=profitorder;
-			if((profitorder<0)&&(openorder==OP_SELL))profitcntpoints+=abs(profitorder);
-			//if((profitorder<0)&&(openorder==OP_BUY))profitcntpoints-=abs(profitorder);
-			//if((profitorder>0)&&(openorder==OP_SELL))profitcntpoints-=abs(profitorder);
-			if( ((profitorder<0)&&(openorder==OP_BUY)) || ((profitorder>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-/* 			if(notprofitcntorders>3){
-				result->profitcntpoints=-1;
-				return result;
-			} */
-			openorderclosed=1;
-			continue;
-		}
+	for(int i=bars-1;i>bars-1-timeout;i--){
 		tcurbar=i;
-		if((openorder==0)||(openorder==-1)){
-			int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-			if((abs(signal)>19) && (signal>0)){
+		int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
+		if(abs(signal)>20){
+			if(signal>0){
 				openorder=OP_SELL;
-				openorderclosed=0;
-				openorderprice=testermetadata->open[i];
-				i+=timeout;
-			}
-		}else
-		if((openorder==1)||(openorder==-1)){
-			int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-			if((abs(signal)>19) && (signal<0)){
+				orderprofit=(testermetadata->open[i]-testermetadata->close[bars-1])/point;
+				orderopentime=testermetadata->ctm[i];
+				nullbartime=testermetadata->ctm[bars-1];
+				i1=i;orderopenprice=testermetadata->open[i];
+				break;
+			}else
+			if(signal<0){
 				openorder=OP_BUY;
-				openorderclosed=0;
-				openorderprice=testermetadata->open[i];
-				i+=timeout;
+				orderprofit=(testermetadata->open[i]-testermetadata->close[bars-1])/point;
+				orderopentime=testermetadata->ctm[i];
+				nullbartime=testermetadata->ctm[bars-1];
+				i1=i;orderopenprice=testermetadata->open[i];
+				break;
 			}
-		}		
-		
+		}
 		
 	}
-	result->profitcntpoints=profitcntpoints;
-	result->period_ma_fast=period_ma_fast;
-	result->period_ma_slow=period_ma_slow;
-	result->cci_period=cci_period;
-	result->profitcntorders=profitcntorders;
-	result->notprofitcntorders=notprofitcntorders;
+	for(int i2=i1;i2<bars;i2++){
+		if((openorder==OP_BUY)&&(testermetadata->high[i2]>=(orderopenprice+point*takeprofit)))
+		{
+			openorder=-1;
+			break;
+		}
+		if((openorder==OP_SELL)&&(testermetadata->low[i2]<=(orderopenprice-point*takeprofit)))
+		{
+			openorder=-1;
+			break;
+		}
+	}
+	result->openorder=openorder;
+	result->orderprofit=orderprofit;
+	result->orderopentime=orderopentime;
+	result->nullbartime=nullbartime;
 	
 	return *result;
 }
-struct tthread{
-	HANDLE handle;
-	bool handleclosed;
-	DWORD threadid;
-	int tf;
-	int timeout;
-	double point;
-	int randcycles;
-	bool done;
-	tresults results;
-};
-int treadcount;
-DWORD WINAPI myThread(LPVOID lpParameter){
-	tthread& thread = *((tthread*)lpParameter);
-	
-	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_ma_fast=0,period_ma_slow=0,cci_period=0;
-	tresults* testerresult;
-	testerresult = new tresults[1];
-	
-	int tf=thread.tf;int timeout=thread.timeout;
-	for(int i=0;i<thread.randcycles;i++){
-		int t1=2,t2=1;
-		while(t1>=t2){t1=rand(8,24);t2=rand(24,222);}
-		testerresult[0] = testerstart(tf,thread.point,timeout,t1,t2,rand(55,222));
-		if( ((testerresult->profitcntorders-testerresult->notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult->profitcntorders >4) && (testerresult->profitcntorders>(testerresult->notprofitcntorders*3))){
-			profitcntpoints = testerresult->profitcntpoints;
-			period_ma_fast = testerresult->period_ma_fast;
-			period_ma_slow = testerresult->period_ma_slow;
-			cci_period = testerresult->cci_period;
-			profitcntorders = testerresult->profitcntorders;
-			notprofitcntorders = testerresult->notprofitcntorders;
-		}
-	}
-	delete[] testerresult;
-	thread.results.profitcntpoints = profitcntpoints;
-	thread.results.period_ma_fast = period_ma_fast;
-	thread.results.period_ma_slow = period_ma_slow;
-	thread.results.cci_period = cci_period;
-	thread.results.profitcntorders = profitcntorders;
-	thread.results.notprofitcntorders = notprofitcntorders;
-	thread.done = true;
-	
-	return 0;
-}
-const char* testertest(const char* ctf,double point, const char* ctimeout, const char* takeprofit) {
+const char* testertest(const char* ctf,const char* ma1,const char* ma2,const char* cci1,double point, const char* ctimeout, const char* takeprofit) {
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
-	int tp;
-
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo( &sysinfo );
-	treadcount=sysinfo.dwNumberOfProcessors;
-	//DWORD threadid = GetCurrentThreadId();
-	tthread threads[treadcount];
-	for(int i=0;i<treadcount;i++){
-		threads[i].done = false;
-		threads[i].tf = tf;
-		threads[i].timeout = timeout;
-		threads[i].point = point;
-		threads[i].randcycles = randcycles;
-		threads[i].handleclosed = false;
-		threads[i].handle=CreateThread(0, 0, myThread, &threads[i], 0, &threads[i].threadid);
-	}	
-	
-	bool thredsdone=false;
-	while(!thredsdone){
-		thredsdone=true;
-		for(int i=0;i<treadcount;i++){
-			if(threads[i].done == false)thredsdone=false; 
-			else {
-				if(!threads[i].handleclosed){
-					CloseHandle(threads[i].handle);
-					threads[i].handleclosed = true;
-				}
-			}
-		}
-		SleepEx(100,true);
+ 
+ 	tresults* testerresult;
+	testerresult = new tresults[1];
+	testerresult[0] = testerstart(tf,point,timeout,strToInt(ma1),strToInt(ma2),strToInt(cci1),strToInt(takeprofit));
+	if((testerresult->openorder==OP_BUY) && (testerresult->orderprofit>0)){
+		lstrcat(itemconfig,"BUY ");
+		lstrcat(itemconfig,intToStr((int)fabs(testerresult->orderprofit)));
+		lstrcat(itemconfig," ");
+		lstrcat(itemconfig,gmtimeToStr(testerresult->orderopentime));
+		lstrcat(itemconfig," ");
+		lstrcat(itemconfig,gmtimeToStr(testerresult->nullbartime));
 	}
-	
-	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_ma_fast=0,period_ma_slow=0,cci_period=0;
-	for(int i=0;i<treadcount;i++){
-		if( ((threads[i].results.profitcntorders-threads[i].results.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (threads[i].results.profitcntorders >4) && (threads[i].results.profitcntorders>(threads[i].results.notprofitcntorders*3))){
-		//if(testerresult->profitcntorders > profitcntorders){
-			profitcntpoints = threads[i].results.profitcntpoints;
-			period_ma_fast = threads[i].results.period_ma_fast;
-			period_ma_slow = threads[i].results.period_ma_slow;
-			cci_period = threads[i].results.cci_period;
-			profitcntorders = threads[i].results.profitcntorders;
-			notprofitcntorders = threads[i].results.notprofitcntorders;
-		}
+	if((testerresult->openorder==OP_SELL) && (testerresult->orderprofit<0)){
+		lstrcat(itemconfig,"SELL ");
+		lstrcat(itemconfig,intToStr((int)fabs(testerresult->orderprofit)));
+		lstrcat(itemconfig," ");
+		lstrcat(itemconfig,gmtimeToStr(testerresult->orderopentime));
+		lstrcat(itemconfig," ");
+		lstrcat(itemconfig,gmtimeToStr(testerresult->nullbartime));		
 	}
-
-	tp = strToInt(takeprofit);
-	if(profitcntorders>0)tp = (int)(profitcntpoints/profitcntorders/1.5);
-	lstrcat(itemconfig,ctf);lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(period_ma_fast));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(period_ma_slow));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(cci_period));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(tp));lstrcat(itemconfig," ");//takeprofit
-	lstrcat(itemconfig,ctimeout);lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(profitcntpoints));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(notprofitcntorders));lstrcat(itemconfig," ");	
-	lstrcat(itemconfig,intToStr(profitcntorders));
+	delete[] testerresult;
+	
 	return (const char *)itemconfig;
 }
-const char* optimize(const char* symbol,const char* tf, const char* timeout, const char* takeprofit) {
+const char* sniper(const char* symbol,const char* ma1,const char* ma2,const char* cci1,const char* tf, const char* timeout, const char* takeprofit) {
 	double point = loadHST(symbol,tf);
 
-	return (const char *)testertest(tf,point,timeout,takeprofit);
+	return (const char *)testertest(tf,ma1,ma2,cci1,point,timeout,takeprofit);
 }
 void ReadConfig(){
 	
@@ -519,37 +438,48 @@ char* GetElement(char* str, int index){
 	delete[] membuf;
 	return &t1config[index][0];
 }
-void PatchConfig(char* symbol, char* param){
-	int i1,i2;
-	for(i1=0; i1<cindex; i1++)
-	if(strcmp(symbol,config[i1][1])==0)
-	   for(i2=0; i2<strToInt(&config[i1][0][0]); i2++){
-		  char c1[100],c2[100]; memset(&c1[0],0,100);memset(&c2[0],0,100);
-		  lstrcat(&c1[0],GetElement(&param[0],0));
-		  lstrcat(&c2[0],GetElement(&config[i1][i2+2][0],0));
-		  if(strcmp(c1,c2)==0){
-			 memset(&config[i1][i2+2][0],0,100);
-			 lstrcat(&config[i1][i2+2][0],param);
-		  }
-	   }
+char snipertxt[10][200][100];
+void InitResults(){
+	for(int tf=0; tf<9; tf++){
+		for(int i1=0; i1<200; i1++)memset(&snipertxt[tf][i1][0],0,100);
+	    lstrcat(&snipertxt[tf][0][0],"0");
+	}
+}
+void PatchConfig(int tf, char* symbol, char* param){
+	if(strlen(&param[0])>0){
+		int i1,i3;
+		if(tf==1)i3=0;if(tf==5)i3=1;if(tf==15)i3=2;if(tf==30)i3=3;if(tf==60)i3=4;if(tf==240)i3=5;
+		if(tf==1440)i3=6;if(tf==10080)i3=7;if(tf==43200)i3=8;
+		i1 = strToInt(&snipertxt[i3][0][0]);
+		memset(&snipertxt[i3][i1+1][0],0,100);
+		lstrcat(&snipertxt[i3][i1+1][0],&symbol[0]);
+		lstrcat(&snipertxt[i3][i1+1][0]," : ");
+		lstrcat(&snipertxt[i3][i1+1][0],&param[0]);
+		
+		memset(&snipertxt[i3][0][0],0,100);
+		lstrcat(&snipertxt[i3][0][0],intToStr(i1+1));
+	}
 }
 void SaveConfig(){
 	char* membuf = new char[2];membuf = (char*)realloc(membuf,50000);memset(membuf,0,50000);
-	FILE *os;os= fopen(pathCONFIG,"wb");
+	FILE *os;os= fopen(pathRESULTS,"wb");
+
+	int tf,i3;
 	
-	for(int i1=0; i1<cindex; i1++)
+	for(tf=0; tf<9; tf++)
 	{
-		lstrcat(membuf,&config[i1][1][0]);lstrcat(membuf,"\r\n");
-		for(int i2=0; i2<strToInt(&config[i1][0][0]); i2++)
+		if(strlen(&snipertxt[tf][0][0])>0){
+	     if(tf==0)i3=1;if(tf==1)i3=5;if(tf==2)i3=15;if(tf==3)i3=30;if(tf==4)i3=60;if(tf==5)i3=240;
+	     if(tf==6)i3=1440;if(tf==7)i3=10080;if(tf==8)i3=43200;
+		 if(strToInt(&snipertxt[tf][0][0])>0)
+		  {lstrcat(membuf,"[ Timeframe ");lstrcat(membuf,intToStr(i3));lstrcat(membuf," ]\r\n");}
+		 for(int i2=0; i2<strToInt(&snipertxt[tf][0][0]); i2++)
 		  {
-		   lstrcat(membuf,&config[i1][i2+2][0]);
-		   if(i1!=(cindex-1))
-			  lstrcat(membuf,"\r\n");
-		   if((i1==(cindex-1))&&(i2!=(strToInt(&config[i1][0][0])-1)))
+		   lstrcat(membuf,&snipertxt[tf][i2+1][0]);lstrcat(membuf,"\r\n");
+		   if(i2==(strToInt(&snipertxt[tf][0][0])-1))
 			  lstrcat(membuf,"\r\n");
 		  }
-		if(i1!=(cindex-1))
-		   lstrcat(membuf,"\r\n");
+		}
 	}	
 	
 	int tmp0=strlen(membuf);
@@ -566,25 +496,28 @@ int main(int argc, char *argv[]){
 
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
 	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);char takeprofit[10];memset(takeprofit,0,10);
+	char ma1[4],ma2[4],cci1[4];
 	char optresult[100];memset(optresult,0,100);
 	
 	testermetadata = new mdata[1];
 
 	ReadConfig();
+	InitResults();
 	
 	for(int i1=0;i1<cindex;i1++){
-		printf("\r\n");printf(&config[i1][1][0]);printf("\r\n");
 		for(int i2=0;i2<strToInt(&config[i1][0][0]);i2++)
-		if(i2<tfdeptf){
+		if(strToInt(GetElement(&config[i1][i2+2][0],1))>0){
 			memset(tf,0,5);memset(timeout,0,10);memset(takeprofit,0,10);memset(optresult,0,100);
+			memset(ma1,0,4);memset(ma2,0,4);memset(cci1,0,4);
 			lstrcat(tf,GetElement(&config[i1][i2+2][0],0));
+			lstrcat(ma1,GetElement(&config[i1][i2+2][0],1));
+			lstrcat(ma2,GetElement(&config[i1][i2+2][0],2));
+			lstrcat(cci1,GetElement(&config[i1][i2+2][0],3));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
 			lstrcat(takeprofit,GetElement(&config[i1][i2+2][0],4));
-			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout,takeprofit));
-			printf(optresult);printf("\r\n");
-			PatchConfig(&config[i1][1][0],optresult);
-		}else {
-			printf(&config[i1][i2+2][0]);printf("\r\n");
+			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,tf,timeout,takeprofit));
+			if(strlen(optresult)>0){printf(tf);printf(" ");printf(&config[i1][1][0]);printf(" ");printf(optresult);printf("\r\n");}
+			PatchConfig(strToInt(tf),&config[i1][1][0],optresult);
 		}
 	}
 	SaveConfig();

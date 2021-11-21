@@ -69,7 +69,7 @@ string GetElement(string str, int index){
    return arr[index];
 }
 int CheckRestriction(string symbol, string timeout){
-
+   timeout="17280"+StringSubstr(timeout,StringLen(timeout)-1,1);
    if(IsTesting()&&(symbol!=Symbol()))return 1;
    for(int i1=0;i1<OrdersTotal();i1++)
      {
@@ -165,21 +165,21 @@ void OnTick()
    prevbar=iOpen(NULL,5,0);
    for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
 
-   for(i2=0;i2<cindex;i2++)
-   for(i3=0;i3<StringToInteger(config[i2][0]);i3++)
-   for(i1=0;i1<OrdersTotal();i1++)
-     {
-      OrderSelect(i1,SELECT_BY_POS,MODE_TRADES);
-      if(OrderSymbol()==config[i2][1]){       
-            if(OrderOpenTime()<(TimeCurrent()-StringToInteger(OrderComment()) ))
-              {
-               if(OrderType()==OP_BUY)
-                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close "+OrderProfit());}
-               else
-                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_ASK),3,Violet);Alert(config[i2][1]+" SELL Close "+OrderProfit());}
-              }
-      }
-     }
+   //for(i2=0;i2<cindex;i2++)
+   //for(i3=0;i3<StringToInteger(config[i2][0]);i3++)
+   //for(i1=0;i1<OrdersTotal();i1++)
+   //  {
+   //   OrderSelect(i1,SELECT_BY_POS,MODE_TRADES);
+   //   if(OrderSymbol()==config[i2][1]){       
+   //         if(OrderOpenTime()<(TimeCurrent()-StringToInteger(OrderComment()) ))
+   //           {
+   //            if(OrderType()==OP_BUY)
+   //               {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close "+OrderProfit());}
+   //            else
+   //               {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_ASK),3,Violet);Alert(config[i2][1]+" SELL Close "+OrderProfit());}
+   //           }
+   //   }
+   //  }
    int    res;
    
    if(OrdersTotal()<511)
@@ -204,12 +204,14 @@ void OnTick()
        StringToInteger(GetElement(config[i2][2+i3],3)));
       if(MathAbs(signal)<21)continue; 
       double takeprofit = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
+      string s1=GetElement(config[i2][2+i3],5);
+      string s2="17280"+StringSubstr(s1,StringLen(s1)-1,1);
 
       if(signal>0)
         {
          for(i1=0;i1<1;i1++){
             res=-1;while(res==-1){
-               res=OrderSend(config[i2][1],OP_SELL,0.01,MarketInfo(config[i2][1],MODE_BID),3,0,MarketInfo(config[i2][1],MODE_BID)-takeprofit,GetElement(config[i2][2+i3],5),0,0,Red);
+               res=OrderSend(config[i2][1],OP_SELL,0.01,MarketInfo(config[i2][1],MODE_BID),3,0,MarketInfo(config[i2][1],MODE_BID)-takeprofit,s2,0,0,Red);
                //res=OrderSend(config[i2][1],OP_BUYSTOP,0.01,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Blue);
                //res=OrderSend(cindex[i2][1],OP_SELLLIMIT,0.01,Bid+GetElement(config[i2][2+i3],4)*Point/2,3,0,Bid-GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Red);
             //Print("ERROR: "+GetLastError());
@@ -222,7 +224,7 @@ void OnTick()
         {
          for(i1=0;i1<1;i1++){
             res=-1; while(res==-1){
-               res=OrderSend(config[i2][1],OP_BUY,0.01,MarketInfo(config[i2][1],MODE_ASK),3,0,MarketInfo(config[i2][1],MODE_ASK)+takeprofit,GetElement(config[i2][2+i3],5),0,0,Blue);
+               res=OrderSend(config[i2][1],OP_BUY,0.01,MarketInfo(config[i2][1],MODE_ASK),3,0,MarketInfo(config[i2][1],MODE_ASK)+takeprofit,s2,0,0,Blue);
                //res=OrderSend(config[i2][1],OP_SELLSTOP,0.01,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Red);
                //res=OrderSend(cindex[i2][1],OP_BUYLIMIT,0.01,Ask-GetElement(config[i2][2+i3],4)*Point/2,3,0,Ask+GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Blue);
             //Print("ERROR: "+GetLastError());   
