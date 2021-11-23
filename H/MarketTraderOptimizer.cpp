@@ -31,7 +31,7 @@
 
 int bars = 1200;//1200//1500
 int tfdeptf=5;
-const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests1.txt";
+const char* pathCONFIG = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\tester\\files\\contests.txt";
 
 
 const char* pathHST = "C:\\Users\\Bogdan\\AppData\\Roaming\\MetaQuotes\\Terminal\\CCD68BFB06049A8615C607C3F6AD69B7\\history\\InstaForex-1Demo.com\\";
@@ -241,7 +241,7 @@ double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,in
    return (ma_fast-ma_slow);	
 }
 int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
-	double tmp1,tmp2,tmp3,prevtmp1=icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+/* 	double tmp1,tmp2,tmp3,prevtmp1=icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
 	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
@@ -250,7 +250,21 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 			if(prevtmp1<tmp1) return (i1*tmp2);
 			prevtmp1=tmp1;
 		}
-	return 0;
+	return 0; */
+	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+	double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	if(tmp3<0)tmp2=-1;else tmp2=1;
+    prevtmp1=tmp3=fabs(tmp3);
+	
+	if(tmp4<=tmp5)
+	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
+		for(int i1=3;i1<200;i1++){
+			tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+			if(prevtmp1<tmp1) return (i1*tmp2);
+			prevtmp1=tmp1;
+		}
+	return 0;	
 }
 //tresults* 
 tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period){
