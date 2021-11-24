@@ -488,7 +488,7 @@ void SaveConfig(){
 	delete[] membuf;	
 }
 int main(int argc, char *argv[]){
-	
+	printf(argv[4]); return 0;
 	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
 	double title1,dt0=time(NULL);
 	rdtsc();

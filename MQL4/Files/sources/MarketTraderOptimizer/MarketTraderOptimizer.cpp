@@ -34,7 +34,7 @@ int tfdepth=5;
 char* pathCONFIG;
 char* pathHST;
 
-int randcycles=50;
+int randcycles=200;
 
 struct mdata{
 	long int ctm[2000];
@@ -56,28 +56,33 @@ struct tresults{
 };
 
 int testercurbar;
-int randptr=0,randbytes[257];
+int randbytes[128][257];
 
 char config[200][9][100];int cindex=0;
 char t1config[1000][100];
 
 inline int rdtsc(){__asm__ __volatile__("rdtsc");}	
 void initrandbytes(){
-	int h=0;
-	while(h==0){
-		for(int z1=0;z1<51;z1++){for(int z=0;z<256;z++){randbytes[z]^=((rand()<<1) % 256)&255;}}
-		for(int z1=0;z1<5;z1++)for(int z=0;z<256;z++)randbytes[z]^=(randbytes[(z+1)%256]>>1)&255;
-		for(int z=0;z<256;z++)if (randbytes[z]>127)h=1;
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo( &sysinfo );
+	int cpucount=sysinfo.dwNumberOfProcessors;
+	int h=0,i1;
+	for(i1=0;i1<cpucount;i1++){
+		while(h==0){
+			for(int z1=0;z1<51;z1++){for(int z=0;z<256;z++){randbytes[i1][z]^=((rand()<<1) % 256)&255;}}
+			for(int z1=0;z1<5;z1++)for(int z=0;z<256;z++)randbytes[i1][z]^=(randbytes[i1][(z+1)%256]>>1)&255;
+			for(int z=0;z<256;z++)if (randbytes[i1][z]>127)h=1;
+		}
 	}
-	randptr=0;
+	randbytes[i1][256]=0;
 }
-int rand(int min, int max){
-	int h=randbytes[randptr];
+int rand(int min, int max, int cpuid){
+	int h=randbytes[cpuid][randbytes[cpuid][256]];
 	if(h<min)h+=min;
-	if(h>max)h=h%max;
+	while(h>max)h=h%max;
 	if(h<min)h+=min;
-	randbytes[randptr]^=randbytes[(randptr+1)%256];
-	randptr=(randptr+1)%256;	
+	randbytes[cpuid][randbytes[cpuid][256]]^=randbytes[cpuid][(randbytes[cpuid][256]+1)%256];
+	randbytes[cpuid][256]=(randbytes[cpuid][256]+1)%256;	
 	return h;
 }
 inline char* intToStr(int i){
@@ -241,8 +246,12 @@ double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,in
 }
 int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
 /* 	double tmp1,tmp2,tmp3,prevtmp1=icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+	double tmp3_2=fabs(icci(10,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp3_3=fabs(icci(18,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
+	
+	if((tmp3>(tmp3_2*1.3))&&(tmp3>(tmp3_3*1.4)))
 	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
 		for(int i1=2;i1<200;i1++){
 			tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
@@ -251,27 +260,32 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 		}
 	return 0; */
 	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
-	double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
-	double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp3_2=fabs(icci(10,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp3_3=fabs(icci(18,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
 	
-	if(tmp4<=tmp5)
-	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
-		for(int i1=3;i1<200;i1++){
-			tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
-			if(prevtmp1<tmp1) return (i1*tmp2);
-			prevtmp1=tmp1;
-		}
+	if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3))){
+		double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+		double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));		
+		if(tmp4<=tmp5)
+		if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
+			for(int i1=3;i1<200;i1++){
+				tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+				if(prevtmp1<tmp1) return (i1*tmp2);
+				prevtmp1=tmp1;
+			}
+	}
 	return 0;	
 }
 //tresults* 
-tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period){
+void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
 	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
 	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0;
 	double openorderprice;
 	int tcurbar;
-	tresults* result = new tresults[1];
+	//tresults& result = *((tresults*)result1);
+	//tresults* result = new tresults[1];
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
 			int profitorder = (int)((testermetadata->close[i]-openorderprice)/point);
@@ -281,10 +295,10 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 			//if((profitorder<0)&&(openorder==OP_BUY))profitcntpoints-=abs(profitorder);
 			//if((profitorder>0)&&(openorder==OP_SELL))profitcntpoints-=abs(profitorder);
 			if( ((profitorder<0)&&(openorder==OP_BUY)) || ((profitorder>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-/* 			if(notprofitcntorders>3){
-				result->profitcntpoints=-1;
-				return result;
-			} */
+			if(profitcntpoints<14){
+				result.profitcntpoints=-1;
+				return;
+			}
 			openorderclosed=1;
 			continue;
 		}
@@ -310,49 +324,52 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 		
 		
 	}
-	result->profitcntpoints=profitcntpoints;
-	result->period_ma_fast=period_ma_fast;
-	result->period_ma_slow=period_ma_slow;
-	result->cci_period=cci_period;
-	result->profitcntorders=profitcntorders;
-	result->notprofitcntorders=notprofitcntorders;
 	
-	return *result;
+	result.profitcntpoints=profitcntpoints;
+	result.period_ma_fast=period_ma_fast;
+	result.period_ma_slow=period_ma_slow;
+	result.cci_period=cci_period;
+	result.profitcntorders=profitcntorders;
+	result.notprofitcntorders=notprofitcntorders;
+	
+	return;
 }
 struct tthread{
 	HANDLE handle;
 	bool handleclosed;
 	DWORD threadid;
+	int id;
 	int tf;
 	int timeout;
 	double point;
 	int randcycles;
 	bool done;
 	tresults results;
+	tresults tmpresults;
 };
 int treadcount;
 DWORD WINAPI myThread(LPVOID lpParameter){
 	tthread& thread = *((tthread*)lpParameter);
 	
 	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_ma_fast=0,period_ma_slow=0,cci_period=0;
-	tresults* testerresult;
-	testerresult = new tresults[1];
+	tresults& testerresult = thread.tmpresults;
 	
 	int tf=thread.tf;int timeout=thread.timeout;
 	for(int i=0;i<thread.randcycles;i++){
-		int t1=2,t2=1;
-		while(t1>=t2){t1=rand(8,24);t2=rand(24,222);}
-		testerresult[0] = testerstart(tf,thread.point,timeout,t1,t2,rand(55,222));
-		if( ((testerresult->profitcntorders-testerresult->notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult->profitcntorders >4) && (testerresult->profitcntorders>(testerresult->notprofitcntorders*3))){
-			profitcntpoints = testerresult->profitcntpoints;
-			period_ma_fast = testerresult->period_ma_fast;
-			period_ma_slow = testerresult->period_ma_slow;
-			cci_period = testerresult->cci_period;
-			profitcntorders = testerresult->profitcntorders;
-			notprofitcntorders = testerresult->notprofitcntorders;
+		int t1=2,t2=1, t3=0;
+		while(t1>=t2){t1=rand(8,24,thread.id);t2=rand(24,222,thread.id);t3=rand(55,222,thread.id);}
+		testerstart(tf,thread.point,timeout,t1,t2,t3,testerresult);
+		if(testerresult.profitcntpoints!=-1)
+		if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
+			profitcntpoints = testerresult.profitcntpoints;
+			period_ma_fast = testerresult.period_ma_fast;
+			period_ma_slow = testerresult.period_ma_slow;
+			cci_period = testerresult.cci_period;
+			profitcntorders = testerresult.profitcntorders;
+			notprofitcntorders = testerresult.notprofitcntorders;
+			
 		}
 	}
-	delete[] testerresult;
 	thread.results.profitcntpoints = profitcntpoints;
 	thread.results.period_ma_fast = period_ma_fast;
 	thread.results.period_ma_slow = period_ma_slow;
@@ -376,12 +393,14 @@ const char* testertest(const char* ctf,double point, const char* ctimeout, const
 	tthread threads[treadcount];
 	for(int i=0;i<treadcount;i++){
 		threads[i].done = false;
+		threads[i].id = i;
 		threads[i].tf = tf;
 		threads[i].timeout = timeout;
 		threads[i].point = point;
 		threads[i].randcycles = randcycles;
 		threads[i].handleclosed = false;
 		threads[i].handle=CreateThread(0, 0, myThread, &threads[i], 0, &threads[i].threadid);
+	//	threads[i].tmpresults = new tresults;
 	}	
 	
 	bool thredsdone=false;

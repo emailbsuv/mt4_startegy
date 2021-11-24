@@ -1,3 +1,5 @@
+0. Версия пограммного комплекса MarketTrader - v0.6 https://github.com/emailbsuv/mt4_startegy/releases
+
 1. Редактируем файл settings.txt 
 
 1500 5 contests.txt InstaForex-1Demo.com

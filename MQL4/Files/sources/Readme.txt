@@ -1,3 +1,5 @@
+0. Версия пограммного комплекса MarketTrader - v0.6 https://github.com/emailbsuv/mt4_startegy/releases
+
 1. Качаем и устанавливаем MingW 64 bit по ссылке 
 
 http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download
