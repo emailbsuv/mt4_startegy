@@ -112,7 +112,8 @@ int DeltaMasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast
 
    double tmp3_2=MathAbs(iCCI2(symbol,tf,10,period_ma_slow,period_ma_fast,cci_period));
    double tmp3_3=MathAbs(iCCI2(symbol,tf,18,period_ma_slow,period_ma_fast,cci_period));
-   if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3))){
+  // if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3)))
+   {
       double tmp4=MathAbs(iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period));
       double tmp5=MathAbs(iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period));
       if(tmp4<=tmp5)
@@ -219,7 +220,8 @@ void OnTick()
       double stoplevel =MarketInfo(config[i2][1],MODE_STOPLEVEL);
       int t1=0;
       
-       if((stoplevel<takeprofit)||(stoplevel<1)){
+       if((stoplevel<takeprofit)||(stoplevel<1))
+       {
          if(signal>0)
            {
             for(i1=0;i1<1;i1++){
