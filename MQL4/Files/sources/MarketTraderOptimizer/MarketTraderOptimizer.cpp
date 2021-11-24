@@ -278,14 +278,11 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 	}
 	return 0;	
 }
-//tresults* 
 void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
 	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
 	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0;
 	double openorderprice;
 	int tcurbar;
-	//tresults& result = *((tresults*)result1);
-	//tresults* result = new tresults[1];
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
 			int profitorder = (int)((testermetadata->close[i]-openorderprice)/point);
