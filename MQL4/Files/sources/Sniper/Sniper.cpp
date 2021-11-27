@@ -240,7 +240,7 @@ double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,in
    return (ma_fast-ma_slow);	
 }
 int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
-	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+/* 	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
 	double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 	double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 	if(tmp3<0)tmp2=-1;else tmp2=1;
@@ -253,7 +253,25 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 			if(prevtmp1<tmp1) return (i1*tmp2);
 			prevtmp1=tmp1;
 		}
-	return 0;
+	return 0; */
+	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
+	double tmp3_2=fabs(icci(10,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp3_3=fabs(icci(18,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	if(tmp3<0)tmp2=-1;else tmp2=1;
+    prevtmp1=tmp3=fabs(tmp3);
+	
+	if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3))){
+		double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+		double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));		
+		if(tmp4<=tmp5)
+		if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
+			for(int i1=3;i1<200;i1++){
+				tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+				if(prevtmp1<tmp1) return (i1*tmp2);
+				prevtmp1=tmp1;
+			}
+	}
+	return 0;	
 }
 tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int takeprofit){
 	int openorder=-1,timeout=(int)(172800/tf/60);

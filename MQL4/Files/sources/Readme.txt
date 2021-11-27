@@ -1,4 +1,4 @@
-0. Версия пограммного комплекса MarketTrader - v0.6 https://github.com/emailbsuv/mt4_startegy/releases
+0. Свежая версия пограммного комплекса MarketTrader https://github.com/emailbsuv/mt4_startegy/releases
 
 1. Качаем и устанавливаем MingW 64 bit по ссылке 
 

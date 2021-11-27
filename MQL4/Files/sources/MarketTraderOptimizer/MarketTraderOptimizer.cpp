@@ -34,7 +34,7 @@ int tfdepth=5;
 char* pathCONFIG;
 char* pathHST;
 
-int randcycles=200;
+int randcycles=100;
 
 struct mdata{
 	long int ctm[2000];
@@ -48,11 +48,16 @@ mdata* testermetadata;
 
 struct tresults{
 	int profitcntorders;
+	int profitcntordersbuy;
+	int profitcntorderssell;
 	int period_ma_fast;
 	int period_ma_slow;
 	int cci_period;
-	int profitcntpoints;
+	int profitcntpointsbuy;
+	int profitcntpointssell;
 	int notprofitcntorders;
+	int stoplossbuy;
+	int stoplosssell;
 };
 
 int testercurbar;
@@ -280,22 +285,44 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 }
 void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
 	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
-	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0;
+	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0;
+	int profitcntordersbuy=0, profitcntorderssell=0;
 	double openorderprice;
 	int tcurbar;
+	int slb=0,sls=0;
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
 			int profitorder = (int)((testermetadata->close[i]-openorderprice)/point);
 			if( ((profitorder>0)&&(openorder==OP_BUY)) || ((profitorder<0)&&(openorder==OP_SELL)) )profitcntorders++;
-			if((profitorder>0)&&(openorder==OP_BUY))profitcntpoints+=profitorder;
-			if((profitorder<0)&&(openorder==OP_SELL))profitcntpoints+=abs(profitorder);
+			if((profitorder>0)&&(openorder==OP_BUY)){
+				profitcntordersbuy++;
+				profitcntpointsbuy+=profitorder;
+				for(int i1=i;i1>=(i-timeout);i1--){
+					int tsl=(int)fabs((openorderprice-testermetadata->low[i1])/point);
+					if( tsl>slb ){
+						//if(slb==0)slb=tsl; else slb=(slb+tsl)/2;
+						slb=tsl;
+					}
+				}
+			}
+			if((profitorder<0)&&(openorder==OP_SELL)){
+				profitcntorderssell++;
+				profitcntpointssell+=abs(profitorder);
+				for(int i1=i;i1>=(i-timeout);i1--){
+					int tsl=(int)fabs((openorderprice-testermetadata->high[i1])/point);
+					if( tsl>sls ){
+						//if(sls==0)sls=tsl; else sls=(sls+tsl)/2;
+						sls=tsl;
+					}
+				}				
+			}
 			//if((profitorder<0)&&(openorder==OP_BUY))profitcntpoints-=abs(profitorder);
 			//if((profitorder>0)&&(openorder==OP_SELL))profitcntpoints-=abs(profitorder);
 			if( ((profitorder<0)&&(openorder==OP_BUY)) || ((profitorder>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-			if(profitcntpoints<14){
-				result.profitcntpoints=-1;
+/* 			if( (profitcntpointsbuy<14) || (profitcntpointssell<14) ){
+				result.profitcntpointsbuy=-1;
 				return;
-			}
+			} */
 			openorderclosed=1;
 			continue;
 		}
@@ -322,12 +349,17 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 		
 	}
 	
-	result.profitcntpoints=profitcntpoints;
+	result.profitcntpointsbuy=profitcntpointsbuy;
+	result.profitcntpointssell=profitcntpointssell;
 	result.period_ma_fast=period_ma_fast;
 	result.period_ma_slow=period_ma_slow;
 	result.cci_period=cci_period;
 	result.profitcntorders=profitcntorders;
+	result.profitcntordersbuy=profitcntordersbuy;
+	result.profitcntorderssell=profitcntorderssell;
 	result.notprofitcntorders=notprofitcntorders;
+	result.stoplossbuy=slb;
+	result.stoplosssell=sls;
 	
 	return;
 }
@@ -349,6 +381,8 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	tthread& thread = *((tthread*)lpParameter);
 	
 	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_ma_fast=0,period_ma_slow=0,cci_period=0;
+	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntordersbuy=0,profitcntorderssell=0;
+	int sls=0,slb=0;
 	tresults& testerresult = thread.tmpresults;
 	
 	int tf=thread.tf;int timeout=thread.timeout;
@@ -356,32 +390,42 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 		int t1=2,t2=1, t3=0;
 		while(t1>=t2){t1=rand(8,24,thread.id);t2=rand(24,222,thread.id);t3=rand(55,222,thread.id);}
 		testerstart(tf,thread.point,timeout,t1,t2,t3,testerresult);
-		if(testerresult.profitcntpoints!=-1)
+		if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
 		if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
-			profitcntpoints = testerresult.profitcntpoints;
+			profitcntpointsbuy = testerresult.profitcntpointsbuy;
+			profitcntpointssell = testerresult.profitcntpointssell;
 			period_ma_fast = testerresult.period_ma_fast;
 			period_ma_slow = testerresult.period_ma_slow;
 			cci_period = testerresult.cci_period;
 			profitcntorders = testerresult.profitcntorders;
+			profitcntordersbuy = testerresult.profitcntordersbuy;
+			profitcntorderssell = testerresult.profitcntorderssell;
 			notprofitcntorders = testerresult.notprofitcntorders;
+			sls = testerresult.stoplosssell;
+			slb = testerresult.stoplossbuy;
 			
 		}
 	}
-	thread.results.profitcntpoints = profitcntpoints;
+	thread.results.profitcntpointsbuy = profitcntpointsbuy;
+	thread.results.profitcntpointssell = profitcntpointssell;
 	thread.results.period_ma_fast = period_ma_fast;
 	thread.results.period_ma_slow = period_ma_slow;
 	thread.results.cci_period = cci_period;
 	thread.results.profitcntorders = profitcntorders;
+	thread.results.profitcntordersbuy = profitcntordersbuy;
+	thread.results.profitcntorderssell = profitcntorderssell;
 	thread.results.notprofitcntorders = notprofitcntorders;
+	thread.results.stoplossbuy = slb;
+	thread.results.stoplosssell = sls;
 	thread.done = true;
 	
 	return 0;
 }
-const char* testertest(const char* ctf,double point, const char* ctimeout, const char* takeprofit) {
+const char* testertest(const char* ctf,double point, const char* ctimeout) {
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
-	int tp;
+	int tpb,tps;
 
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
@@ -416,35 +460,47 @@ const char* testertest(const char* ctf,double point, const char* ctimeout, const
 	}
 	
 	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_ma_fast=0,period_ma_slow=0,cci_period=0;
+	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntordersbuy=0,profitcntorderssell=0;
+	int sls=0,slb=0;
 	for(int i=0;i<treadcount;i++){
 		if( ((threads[i].results.profitcntorders-threads[i].results.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (threads[i].results.profitcntorders >4) && (threads[i].results.profitcntorders>(threads[i].results.notprofitcntorders*3))){
 		//if(testerresult->profitcntorders > profitcntorders){
-			profitcntpoints = threads[i].results.profitcntpoints;
+			profitcntpointsbuy = threads[i].results.profitcntpointsbuy;
+			profitcntpointssell = threads[i].results.profitcntpointssell;
 			period_ma_fast = threads[i].results.period_ma_fast;
 			period_ma_slow = threads[i].results.period_ma_slow;
 			cci_period = threads[i].results.cci_period;
 			profitcntorders = threads[i].results.profitcntorders;
+			profitcntordersbuy = threads[i].results.profitcntordersbuy;
+			profitcntorderssell = threads[i].results.profitcntorderssell;
 			notprofitcntorders = threads[i].results.notprofitcntorders;
+			sls = threads[i].results.stoplosssell;
+			slb = threads[i].results.stoplossbuy;
 		}
 	}
 
-	tp = strToInt(takeprofit);
-	if(profitcntorders>0)tp = (int)(profitcntpoints/profitcntorders/1.5);
+	tpb = 0;
+	tps = 0;
+	if(profitcntordersbuy>0)tpb = (int)(profitcntpointsbuy/profitcntordersbuy/1.5);
+	if(profitcntorderssell>0)tps = (int)(profitcntpointssell/profitcntorderssell/1.5);
 	lstrcat(itemconfig,ctf);lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_fast));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_slow));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(cci_period));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(tp));lstrcat(itemconfig," ");//takeprofit
+	lstrcat(itemconfig,intToStr(tps));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,ctimeout);lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(profitcntpoints));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(notprofitcntorders));lstrcat(itemconfig," ");	
-	lstrcat(itemconfig,intToStr(profitcntorders));
+	lstrcat(itemconfig,intToStr(profitcntorders));lstrcat(itemconfig," ");
+	lstrcat(itemconfig,intToStr(sls));lstrcat(itemconfig," ");
+	lstrcat(itemconfig,intToStr(slb));lstrcat(itemconfig," ");
+	lstrcat(itemconfig,intToStr(tpb));
 	return (const char *)itemconfig;
 }
-const char* optimize(const char* symbol,const char* tf, const char* timeout, const char* takeprofit) {
+const char* optimize(const char* symbol,const char* tf, const char* timeout) {
 	double point = loadHST(symbol,tf);
 
-	return (const char *)testertest(tf,point,timeout,takeprofit);
+	return (const char *)testertest(tf,point,timeout);
 }
 void ReadConfig(){
 	
@@ -597,7 +653,7 @@ int main(int argc, char *argv[]){
 	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[4]);lstrcat(pathHST,"\\");
 	tfdepth = strToInt(argv[2]);bars = strToInt(argv[1]);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
-	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);char takeprofit[10];memset(takeprofit,0,10);
+	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);char takeprofitbuy[10];memset(takeprofitbuy,0,10);
 	char optresult[100];memset(optresult,0,100);
 	
 	testermetadata = new mdata[1];
@@ -608,11 +664,10 @@ int main(int argc, char *argv[]){
 		printf("\r\n");printf(&config[i1][1][0]);printf("\r\n");
 		for(int i2=0;i2<strToInt(&config[i1][0][0]);i2++)
 		if(i2<tfdepth){
-			memset(tf,0,5);memset(timeout,0,10);memset(takeprofit,0,10);memset(optresult,0,100);
+			memset(tf,0,5);memset(timeout,0,10);memset(optresult,0,100);
 			lstrcat(tf,GetElement(&config[i1][i2+2][0],0));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
-			lstrcat(takeprofit,GetElement(&config[i1][i2+2][0],4));
-			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout,takeprofit));
+			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout));
 			printf(optresult);printf("\r\n");
 			PatchConfig(&config[i1][1][0],optresult);
 		}else {
