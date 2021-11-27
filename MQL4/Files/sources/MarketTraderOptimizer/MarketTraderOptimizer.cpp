@@ -29,12 +29,12 @@
 #define PRICE_TYPICAL 5
 #define PRICE_WEIGHTED 6
 
-int bars = 1200;
+int bars = 1500;
 int tfdepth=5;
 char* pathCONFIG;
 char* pathHST;
 
-int randcycles=100;
+int randcycles=200;
 
 struct mdata{
 	long int ctm[2000];
@@ -319,10 +319,10 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 			//if((profitorder<0)&&(openorder==OP_BUY))profitcntpoints-=abs(profitorder);
 			//if((profitorder>0)&&(openorder==OP_SELL))profitcntpoints-=abs(profitorder);
 			if( ((profitorder<0)&&(openorder==OP_BUY)) || ((profitorder>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-/* 			if( (profitcntpointsbuy<14) || (profitcntpointssell<14) ){
+			if( notprofitcntorders>1 ){
 				result.profitcntpointsbuy=-1;
 				return;
-			} */
+			}
 			openorderclosed=1;
 			continue;
 		}
