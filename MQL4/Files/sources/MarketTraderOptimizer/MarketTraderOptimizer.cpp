@@ -34,7 +34,7 @@ int tfdepth=5;
 char* pathCONFIG;
 char* pathHST;
 
-int randcycles=200;
+int randcycles=100;
 
 struct mdata{
 	long int ctm[2000];
@@ -73,6 +73,7 @@ void initrandbytes(){
 	int cpucount=sysinfo.dwNumberOfProcessors;
 	int h=0,i1;
 	for(i1=0;i1<cpucount;i1++){
+		h=0;
 		while(h==0){
 			for(int z1=0;z1<51;z1++){for(int z=0;z<256;z++){randbytes[i1][z]^=((rand()<<1) % 256)&255;}}
 			for(int z1=0;z1<5;z1++)for(int z=0;z<256;z++)randbytes[i1][z]^=(randbytes[i1][(z+1)%256]>>1)&255;
@@ -270,7 +271,8 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
 	
-	if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3))){
+	if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3)))
+	{
 		double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
 		double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));		
 		if(tmp4<=tmp5)
@@ -419,6 +421,7 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	thread.results.stoplosssell = sls;
 	thread.done = true;
 	
+	
 	return 0;
 }
 const char* testertest(const char* ctf,double point, const char* ctimeout) {
@@ -430,7 +433,6 @@ const char* testertest(const char* ctf,double point, const char* ctimeout) {
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
 	treadcount=sysinfo.dwNumberOfProcessors;
-	//DWORD threadid = GetCurrentThreadId();
 	tthread threads[treadcount];
 	for(int i=0;i<treadcount;i++){
 		threads[i].done = false;
@@ -441,7 +443,6 @@ const char* testertest(const char* ctf,double point, const char* ctimeout) {
 		threads[i].randcycles = randcycles;
 		threads[i].handleclosed = false;
 		threads[i].handle=CreateThread(0, 0, myThread, &threads[i], 0, &threads[i].threadid);
-	//	threads[i].tmpresults = new tresults;
 	}	
 	
 	bool thredsdone=false;
