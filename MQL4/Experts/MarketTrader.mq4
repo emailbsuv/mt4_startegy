@@ -212,8 +212,10 @@ void OnTick()
        StringToInteger(GetElement(config[i2][2+i3],2)),
        StringToInteger(GetElement(config[i2][2+i3],3)));
       if(MathAbs(signal)<21)continue; 
-      double takeprofits = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
-      double takeprofitb = StringToInteger(GetElement(config[i2][2+i3],11))*MarketInfo(config[i2][1],MODE_POINT);
+      double takeprofits = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double takeprofitb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],11))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplosss = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],9))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplossb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],10))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
       string s1=GetElement(config[i2][2+i3],5);
       string s2="17280"+StringSubstr(s1,StringLen(s1)-1,1);
       //double stoplevel =MarketInfo(config[i2][1],MODE_STOPLEVEL);
@@ -226,25 +228,25 @@ void OnTick()
            {
             for(i1=0;i1<1;i1++){
                res=-1;while(res==-1){
-                  res=OrderSend(config[i2][1],OP_SELL,Lot,MarketInfo(config[i2][1],MODE_BID),3,MarketInfo(config[i2][1],MODE_BID)+StringToInteger(GetElement(config[i2][2+i3],9))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_BID)-takeprofits,s2,0,0,Red);
+                  res=OrderSend(config[i2][1],OP_SELL,Lot,MarketInfo(config[i2][1],MODE_BID),3,MarketInfo(config[i2][1],MODE_ASK)+stoplosss,MarketInfo(config[i2][1],MODE_ASK)-takeprofits,s2,0,0,Red);
                   //res=OrderSend(config[i2][1],OP_BUYSTOP,0.01,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Blue);
                   //res=OrderSend(cindex[i2][1],OP_SELLLIMIT,0.01,Bid+GetElement(config[i2][2+i3],4)*Point/2,3,0,Bid-GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Red);
                //Print("ERROR: "+GetLastError());
                   t1++;if(t1>5)res=0;Sleep(1000);}
             }
-            Alert(config[i2][1]+" SELL");
+           // Alert(config[i2][1]+" SELL");
            }
          if(signal<0)
            {
             for(i1=0;i1<1;i1++){
                res=-1;while(res==-1){
-                  res=OrderSend(config[i2][1],OP_BUY,Lot,MarketInfo(config[i2][1],MODE_ASK),3,MarketInfo(config[i2][1],MODE_ASK)-StringToInteger(GetElement(config[i2][2+i3],10))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_ASK)+takeprofitb,s2,0,0,Blue);
+                  res=OrderSend(config[i2][1],OP_BUY,Lot,MarketInfo(config[i2][1],MODE_ASK),3,MarketInfo(config[i2][1],MODE_BID)-stoplossb,MarketInfo(config[i2][1],MODE_BID)+takeprofitb,s2,0,0,Blue);
                   //res=OrderSend(config[i2][1],OP_SELLSTOP,0.01,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Red);
                   //res=OrderSend(cindex[i2][1],OP_BUYLIMIT,0.01,Ask-GetElement(config[i2][2+i3],4)*Point/2,3,0,Ask+GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Blue);
                //Print("ERROR: "+GetLastError());   
                  t1++;if(t1>5)res=0;Sleep(1000);}
             }
-            Alert(config[i2][1]+" BUY");
+           // Alert(config[i2][1]+" BUY");
            }
          }
      }

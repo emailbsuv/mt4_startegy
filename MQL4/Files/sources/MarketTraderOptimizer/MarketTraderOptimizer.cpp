@@ -34,7 +34,7 @@ int tfdepth=5;
 char* pathCONFIG;
 char* pathHST;
 
-int randcycles=100;
+int randcycles=50;
 
 struct mdata{
 	long int ctm[2000];
@@ -60,7 +60,7 @@ struct tresults{
 	int stoplosssell;
 };
 
-int testercurbar;
+int testercurbar,timeshift;
 int randbytes[128][257];
 
 char config[200][9][100];int cindex=0;
@@ -217,7 +217,7 @@ double loadHST(const char* symbol,const char* tf){
 			
 			if(dwFileSize>=148+60){
 				i=0;
-				fseek(hFile,dwFileSize-60*bars,SEEK_SET);
+				fseek(hFile,dwFileSize-60*bars-60*timeshift,SEEK_SET);
 				fread(membuf,60*bars,1,hFile);
 				while(i1<bars){
 					memcpy(&testermetadata->ctm[i1],&membuf[i],8);i+=8;
@@ -288,6 +288,7 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
 	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
 	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0;
+	int tprofitcntpointsbuy=9999999,tprofitcntpointssell=9999999;
 	int profitcntordersbuy=0, profitcntorderssell=0;
 	double openorderprice;
 	int tcurbar;
@@ -298,35 +299,42 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 			if( ((profitorder>0)&&(openorder==OP_BUY)) || ((profitorder<0)&&(openorder==OP_SELL)) )profitcntorders++;
 			if((profitorder>0)&&(openorder==OP_BUY)){
 				profitcntordersbuy++;
-				profitcntpointsbuy+=profitorder;
+				//profitcntpointsbuy+=profitorder;
 				for(int i1=i;i1>=(i-timeout);i1--){
-					int tsl=(int)fabs((openorderprice-testermetadata->low[i1])/point);
+					int tsl=(int)((openorderprice-testermetadata->low[i1])/point);
 					if( tsl>slb ){
 						//if(slb==0)slb=tsl; else slb=(slb+tsl)/2;
 						slb=tsl;
 					}
+					int ttp=(int)((testermetadata->high[i1]-openorderprice)/point);
+					if( ttp> profitcntpointsbuy) profitcntpointsbuy=ttp;
 				}
 			}
 			if((profitorder<0)&&(openorder==OP_SELL)){
 				profitcntorderssell++;
-				profitcntpointssell+=abs(profitorder);
+				//profitcntpointssell+=abs(profitorder);
 				for(int i1=i;i1>=(i-timeout);i1--){
-					int tsl=(int)fabs((openorderprice-testermetadata->high[i1])/point);
+					int tsl=(int)((testermetadata->high[i1]-openorderprice)/point);
 					if( tsl>sls ){
 						//if(sls==0)sls=tsl; else sls=(sls+tsl)/2;
 						sls=tsl;
 					}
+					int ttp=(int)((openorderprice-testermetadata->low[i1])/point);
+					if( ttp> profitcntpointssell) profitcntpointssell=ttp;
 				}				
 			}
+		if((tprofitcntpointsbuy>profitcntpointsbuy)&&(profitcntpointsbuy!=0))tprofitcntpointsbuy=profitcntpointsbuy;
+		if((tprofitcntpointssell>profitcntpointssell)&&(profitcntpointssell!=0))tprofitcntpointssell=profitcntpointssell;
+
 			//if((profitorder<0)&&(openorder==OP_BUY))profitcntpoints-=abs(profitorder);
 			//if((profitorder>0)&&(openorder==OP_SELL))profitcntpoints-=abs(profitorder);
 			if( ((profitorder<0)&&(openorder==OP_BUY)) || ((profitorder>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-			if( notprofitcntorders>1 ){
+/* 			if( notprofitcntorders>1 ){
 				result.profitcntpointsbuy=-1;
 				return;
-			}
+			} */
 			openorderclosed=1;
-			continue;
+			//continue;
 		}
 		tcurbar=i;
 		if((openorder==0)||(openorder==-1)){
@@ -336,6 +344,7 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 				openorderclosed=0;
 				openorderprice=testermetadata->open[i];
 				i+=timeout;
+				profitcntpointssell=0;
 			}
 		}else
 		if((openorder==1)||(openorder==-1)){
@@ -345,14 +354,16 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 				openorderclosed=0;
 				openorderprice=testermetadata->open[i];
 				i+=timeout;
+				profitcntpointsbuy=0;
 			}
 		}		
 		
-		
 	}
+	if(slb <tprofitcntpointsbuy)slb=tprofitcntpointsbuy;
+	if(sls <tprofitcntpointssell)sls=tprofitcntpointssell;
 	
-	result.profitcntpointsbuy=profitcntpointsbuy;
-	result.profitcntpointssell=profitcntpointssell;
+	result.profitcntpointsbuy=tprofitcntpointsbuy;
+	result.profitcntpointssell=tprofitcntpointssell;
 	result.period_ma_fast=period_ma_fast;
 	result.period_ma_slow=period_ma_slow;
 	result.cci_period=cci_period;
@@ -482,8 +493,8 @@ const char* testertest(const char* ctf,double point, const char* ctimeout) {
 
 	tpb = 0;
 	tps = 0;
-	if(profitcntordersbuy>0)tpb = (int)(profitcntpointsbuy/profitcntordersbuy/1.5);
-	if(profitcntorderssell>0)tps = (int)(profitcntpointssell/profitcntorderssell/1.5);
+	if(profitcntordersbuy>0)tpb = (int)(profitcntpointsbuy);
+	if(profitcntorderssell>0)tps = (int)(profitcntpointssell);
 	lstrcat(itemconfig,ctf);lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_fast));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_ma_slow));lstrcat(itemconfig," ");
@@ -651,8 +662,9 @@ int main(int argc, char *argv[]){
 	initrandbytes();
 
 	pathCONFIG = new char[500];memset(pathCONFIG,0,500);lstrcat(pathCONFIG,argv[3]);
-	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[4]);lstrcat(pathHST,"\\");
+	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[5]);lstrcat(pathHST,"\\");
 	tfdepth = strToInt(argv[2]);bars = strToInt(argv[1]);
+	timeshift = strToInt(argv[4]);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
 	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);char takeprofitbuy[10];memset(takeprofitbuy,0,10);
 	char optresult[100];memset(optresult,0,100);
