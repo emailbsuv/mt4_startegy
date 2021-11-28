@@ -33,7 +33,7 @@ char* pathCONFIG;
 char* pathRESULTS = "tester.txt";
 
 
-int bars = 1070;//1070//1500
+int bars;
 int randcycles=50;
 int timeshift;
 char* pathHST;
@@ -516,7 +516,7 @@ char* SaveResults(){
 		  }
 		}
 	}
-	midtimeout = (int)(midtimeout/(totalprofitorders+totalnotprofitorders));
+	if((totalprofitorders+totalnotprofitorders)>0)midtimeout = (int)(midtimeout/(totalprofitorders+totalnotprofitorders)); else midtimeout=0;
 	lstrcat(membuf,"totalloss : "); lstrcat(membuf,intToStr(totalloss));lstrcat(membuf,"\r\n");
 	lstrcat(membuf,"totalprofit : "); lstrcat(membuf,intToStr(totalprofit));lstrcat(membuf,"\r\n");
 	lstrcat(membuf,"totalprofitorders : "); lstrcat(membuf,intToStr(totalprofitorders));lstrcat(membuf,"\r\n");
@@ -553,13 +553,16 @@ int main(int argc, char *argv[]){
 
 	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
 	double title1,dt0=time(NULL);
+	double mulsl=1,multp=1;
 	rdtsc();
 	srand(time(0));
 	initrandbytes();
 
     pathCONFIG = new char[500];memset(pathCONFIG,0,500);lstrcat(pathCONFIG,argv[3]);
-	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[5]);lstrcat(pathHST,"\\");
+	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
 	timeshift = strToInt(argv[4]);bars = strToInt(argv[1]);
+	mulsl = strtod(argv[5], NULL);
+	multp = strtod(argv[6], NULL);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
 	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);
 	int tpbuy,tpsell,slsell,slbuy;
@@ -586,7 +589,8 @@ int main(int argc, char *argv[]){
 			lstrcat(ma2,GetElement(&config[i1][i2+2][0],2));
 			lstrcat(cci1,GetElement(&config[i1][i2+2][0],3));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
-			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,tf,timeout,tpsell,slsell,slbuy,tpbuy));
+			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,tf,timeout,tpsell*multp,slsell*mulsl,slbuy*mulsl,tpbuy*multp));
+			
 			if(strlen(optresult)>0){printf(tf);printf(" ");printf(&config[i1][1][0]);printf(" ");printf(optresult);printf("\r\n");}
 			PatchConfig(strToInt(tf),&config[i1][1][0],optresult);
 		}

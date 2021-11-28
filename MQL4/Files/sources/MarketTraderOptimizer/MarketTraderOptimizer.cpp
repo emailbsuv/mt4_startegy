@@ -655,6 +655,7 @@ void SaveConfig(){
 	delete[] membuf;	
 }
 int main(int argc, char *argv[]){
+
 	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
 	double title1,dt0=time(NULL);
 	rdtsc();
@@ -662,9 +663,10 @@ int main(int argc, char *argv[]){
 	initrandbytes();
 
 	pathCONFIG = new char[500];memset(pathCONFIG,0,500);lstrcat(pathCONFIG,argv[3]);
-	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[5]);lstrcat(pathHST,"\\");
+	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
 	tfdepth = strToInt(argv[2]);bars = strToInt(argv[1]);
 	timeshift = strToInt(argv[4]);
+	if(bars<=timeshift)bars=timeshift+300;
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
 	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);char takeprofitbuy[10];memset(takeprofitbuy,0,10);
 	char optresult[100];memset(optresult,0,100);

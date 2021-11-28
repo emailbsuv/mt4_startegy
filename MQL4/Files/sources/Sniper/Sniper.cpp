@@ -273,7 +273,7 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 	}
 	return 0;	
 }
-tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int takeprofit){
+tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period,int tps,int sls,int slb,int tpb){
 	int openorder=-1,timeout=(int)(ctimeout/tf/60);
 	if(tf>240)timeout*=3;
 	double orderprofit=0.0,orderopentime=0,nullbartime=0,orderopenprice=0.0;
@@ -303,12 +303,12 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 		
 	}
 	for(int i2=i1;i2<bars;i2++){
-		if((openorder==OP_BUY)&&(testermetadata->high[i2]>=(orderopenprice+point*takeprofit)))
+		if((openorder==OP_BUY)&&( ( testermetadata->high[i2] >= (orderopenprice+point*tpb) ) || ( testermetadata->low[i2] <= (orderopenprice-point*slb) ) ))
 		{
 			openorder=-1;
 			break;
 		}
-		if((openorder==OP_SELL)&&(testermetadata->low[i2]<=(orderopenprice-point*takeprofit)))
+		if((openorder==OP_SELL)&&( ( testermetadata->high[i2] >= (orderopenprice+point*sls) ) || ( testermetadata->low[i2] <= (orderopenprice-point*tps) ) ))
 		{
 			openorder=-1;
 			break;
@@ -321,14 +321,14 @@ tresults testerstart(int tf, double point, int ctimeout, int period_ma_fast, int
 	
 	return *result;
 }
-const char* testertest(const char* ctf,const char* ma1,const char* ma2,const char* cci1,double point, const char* ctimeout, const char* takeprofit) {
+const char* testertest(const char* ctf,const char* ma1,const char* ma2,const char* cci1,double point, const char* ctimeout, int tps, int sls,int slb,int tpb) {
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
  
  	tresults* testerresult;
 	testerresult = new tresults[1];
-	testerresult[0] = testerstart(tf,point,timeout,strToInt(ma1),strToInt(ma2),strToInt(cci1),strToInt(takeprofit));
+	testerresult[0] = testerstart(tf,point,timeout,strToInt(ma1),strToInt(ma2),strToInt(cci1),tps,sls,slb,tpb);
 	if((testerresult->openorder==OP_BUY) && (testerresult->orderprofit>0)){
 		lstrcat(itemconfig,"BUY ");
 		lstrcat(itemconfig,intToStr((int)fabs(testerresult->orderprofit)));
@@ -349,10 +349,10 @@ const char* testertest(const char* ctf,const char* ma1,const char* ma2,const cha
 	
 	return (const char *)itemconfig;
 }
-const char* sniper(const char* symbol,const char* ma1,const char* ma2,const char* cci1,const char* tf, const char* timeout, const char* takeprofit) {
+const char* sniper(const char* symbol,const char* ma1,const char* ma2,const char* cci1,const char* tf, const char* timeout, int tps,int sls,int slb,int tpb) {
 	double point = loadHST(symbol,tf);
 
-	return (const char *)testertest(tf,ma1,ma2,cci1,point,timeout,takeprofit);
+	return (const char *)testertest(tf,ma1,ma2,cci1,point,timeout,tps,sls,slb,tpb);
 }
 void ReadConfig(){
 	
@@ -478,11 +478,13 @@ void PatchConfig(int tf, char* symbol, char* param){
 		lstrcat(&snipertxt[i3][0][0],intToStr(i1+1));
 	}
 }
-void SaveConfig(){
+char totalresults[5000];
+char* SaveConfig(){
 	char* membuf = new char[2];membuf = (char*)realloc(membuf,50000);memset(membuf,0,50000);
+	memset(totalresults,0,5000);
 	FILE *os;os= fopen(pathRESULTS,"wb");
 
-	int tf,i3;
+	int tf,i3,i4=0;
 	
 	for(tf=0; tf<9; tf++)
 	{
@@ -490,7 +492,7 @@ void SaveConfig(){
 	     if(tf==0)i3=1;if(tf==1)i3=5;if(tf==2)i3=15;if(tf==3)i3=30;if(tf==4)i3=60;if(tf==5)i3=240;
 	     if(tf==6)i3=1440;if(tf==7)i3=10080;if(tf==8)i3=43200;
 		 if(strToInt(&snipertxt[tf][0][0])>0)
-		  {lstrcat(membuf,"[ Timeframe ");lstrcat(membuf,intToStr(i3));lstrcat(membuf," ]\r\n");}
+		  {lstrcat(membuf,"[ Timeframe ");lstrcat(membuf,intToStr(i3));lstrcat(membuf," ]\r\n");i4++;}
 		 for(int i2=0; i2<strToInt(&snipertxt[tf][0][0]); i2++)
 		  {
 		   lstrcat(membuf,&snipertxt[tf][i2+1][0]);lstrcat(membuf,"\r\n");
@@ -499,22 +501,24 @@ void SaveConfig(){
 		  }
 		}
 	}	
-	
+	if(i4>0)lstrcat(&totalresults[0],"\r\nResults saved in sniper.txt\r\n"); else lstrcat(&totalresults[0],"\r\nNo results for you (( \r\n");
 	int tmp0=strlen(membuf);
-	fwrite(membuf,tmp0,1,os);
+	if(i4>0)fwrite(membuf,tmp0,1,os);
 	fclose(os);
-	delete[] membuf;	
+	delete[] membuf;
+	return &totalresults[0];	
 }
 int main(int argc, char *argv[]){
 
 	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
 	double title1,dt0=time(NULL);
+	int tps, tpb, sls, slb;
 	rdtsc();
 	srand(time(0));
 	initrandbytes();
 
     pathCONFIG = new char[500];memset(pathCONFIG,0,500);lstrcat(pathCONFIG,argv[3]);
-	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[4]);lstrcat(pathHST,"\\");
+	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
 	tfdepth = strToInt(argv[2]);bars = strToInt(argv[1]);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
 	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);char takeprofit[10];memset(takeprofit,0,10);
@@ -536,13 +540,16 @@ int main(int argc, char *argv[]){
 			lstrcat(ma2,GetElement(&config[i1][i2+2][0],2));
 			lstrcat(cci1,GetElement(&config[i1][i2+2][0],3));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
-			lstrcat(takeprofit,GetElement(&config[i1][i2+2][0],4));
-			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,tf,timeout,takeprofit));
+			tps=strToInt(GetElement(&config[i1][i2+2][0],4));
+			sls=strToInt(GetElement(&config[i1][i2+2][0],9)); 
+			slb=strToInt(GetElement(&config[i1][i2+2][0],10));
+			tpb=strToInt(GetElement(&config[i1][i2+2][0],11)); 
+			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,tf,timeout,tps,sls,slb,tpb));
 			if(strlen(optresult)>0){printf(tf);printf(" ");printf(&config[i1][1][0]);printf(" ");printf(optresult);printf("\r\n");}
 			PatchConfig(strToInt(tf),&config[i1][1][0],optresult);
 		}
 	}
-	SaveConfig();
+	printf(SaveConfig());
 /* 	lstrcat(stm1,gmtimeToStr(testermetadata->ctm[bars-1]));lstrcat(stm1,"\r\n");
 	lstrcat(stm1,doubleToStr(testermetadata->open[bars-1],4));lstrcat(stm1,"\r\n");
 	lstrcat(stm1,doubleToStr(testermetadata->high[bars-1],4));lstrcat(stm1,"\r\n");

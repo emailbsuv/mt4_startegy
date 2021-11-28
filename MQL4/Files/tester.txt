@@ -1,38 +1,37 @@
-totalloss : 67843
-totalprofit : 235990
-totalprofitorders : 26
-totalnotprofitorders : 20
-midtimeout : 112 minutes
+totalloss : 68230
+totalprofit : 355685
+totalprofitorders : 36
+totalnotprofitorders : 6
+midtimeout : 248 minutes
 
 
 [ Timeframe 5 ]
-#Bitcoin 0 20623 1 0 20
-Cardano 1288 0 0 1 85
-BCHUSD 0 663 1 0 25
-Polkadot 4269 0 0 1 85
-Uniswap 0 0 0 0 0
+Filecoin 0 0 0 0 0
+Cardano 0 0 0 0 0
+Solana 0 201 1 0 75
 
 [ Timeframe 15 ]
-#Bitcoin 31475 0 0 1 15
-#Ethereum 5728 2211 1 2 75
-#Litecoin 178 234 1 1 105
-#Ripple 182 0 0 1 90
-Filecoin 351 179 1 1 30
-Cardano 0 3952 2 0 135
-BCHUSD 0 359 1 0 15
-Chainlink 0 13255 1 0 15
-Polkadot 6746 2689 1 2 45
-Solana 0 376 3 0 60
-Uniswap 126 332 1 1 120
+#Bitcoin 0 67828 1 0 390
+#Litecoin 0 286 1 0 45
+#Ripple 0 136 2 0 330
+Doge 0 379 1 0 90
+Filecoin 1252 387 1 1 75
+Cardano 0 1986 1 0 45
+BCHUSD 0 490 1 0 330
+Chainlink 0 47880 3 0 510
+Polkadot 7488 0 0 1 315
+Solana 0 288 1 0 45
+Uniswap 228 228 1 1 525
 
 [ Timeframe 30 ]
-#Ethereum 5025 8578 2 1 180
-Doge 368 638 2 1 1170
-Filecoin 1374 0 0 3 150
-Cardano 3473 1855 1 2 240
-BCHUSD 0 0 0 0 0
-Chainlink 0 179060 2 0 1140
-Polkadot 7125 0 0 1 300
-Solana 0 377 2 0 90
-Uniswap 135 609 3 1 990
+#Bitcoin 58650 16875 1 1 270
+#Ethereum 0 12590 2 0 900
+#Ripple 0 207 2 0 480
+Doge 0 1460 4 0 1800
+Cardano 0 4101 1 0 330
+BCHUSD 0 1275 2 0 480
+Chainlink 0 169713 3 0 840
+Polkadot 0 27818 3 0 1140
+Solana 612 612 2 2 330
+Uniswap 0 945 2 0 1080
 

@@ -9,6 +9,7 @@ int lastorder,firststart;
 string config[200][9];
 int cindex,cindex1=0,cindex2=1;
 double prevbar;
+double mulsl,multp;
 int OnInit()
   {
    int filehandle;
@@ -19,6 +20,8 @@ int OnInit()
    FileSeek(filehandle,0,SEEK_SET);
    str1=FileReadString(filehandle);
    FileClose(filehandle);
+   mulsl=StringToDouble(GetElement(str1,4));
+   multp=StringToDouble(GetElement(str1,5));
    filehandle=FileOpen(GetElement(str1,2),FILE_READ|FILE_TXT);
    FileSeek(filehandle,0,SEEK_SET);
    string tmp01;
@@ -212,10 +215,10 @@ void OnTick()
        StringToInteger(GetElement(config[i2][2+i3],2)),
        StringToInteger(GetElement(config[i2][2+i3],3)));
       if(MathAbs(signal)<21)continue; 
-      double takeprofits = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
-      double takeprofitb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],11))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
-      double stoplosss = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],9))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
-      double stoplossb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],10))*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double takeprofits = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],4))*multp*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double takeprofitb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],11))*multp*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplosss = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],9))*mulsl*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplossb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],10))*mulsl*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
       string s1=GetElement(config[i2][2+i3],5);
       string s2="17280"+StringSubstr(s1,StringLen(s1)-1,1);
       //double stoplevel =MarketInfo(config[i2][1],MODE_STOPLEVEL);
