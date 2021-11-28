@@ -39,12 +39,12 @@ int timeshift;
 char* pathHST;
 
 struct mdata{
-	long int ctm[2000];
-	double open[2000];
-	double low[2000];
-	double high[2000];
-	double close[2000];
-	double volume[2000];
+	long int ctm[50000];
+	double open[50000];
+	double low[50000];
+	double high[50000];
+	double close[50000];
+	double volume[50000];
 };
 mdata* testermetadata;
 
