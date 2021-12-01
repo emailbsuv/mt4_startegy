@@ -1,16 +1,15 @@
-//+------------------------------------------------------------------+
-//|                                               Moving Average.mq4 |
-//|                   Copyright 2005-2014, MetaQuotes Software Corp. |
-//|                                              http://www.mql4.com |
-//+------------------------------------------------------------------+
-#property copyright   "2005-2014, MetaQuotes Software Corp."
-#property link        "http://www.mql4.com"
-#property description "Moving Average sample expert advisor"
+#property copyright "Copyright 2021, Suvorov Bogdan"
+#property link      "https://t.me/markettraderoptimizer"
+#property description "MarketTrader expert advisor"
+
+input bool TradeSundaySaturday=true;
+input double Lot=0.01;
 
 int lastorder,firststart;
 string config[200][9];
 int cindex,cindex1=0,cindex2=1;
 double prevbar;
+double mulsl,multp;
 int OnInit()
   {
    int filehandle;
@@ -21,6 +20,8 @@ int OnInit()
    FileSeek(filehandle,0,SEEK_SET);
    str1=FileReadString(filehandle);
    FileClose(filehandle);
+   mulsl=StringToDouble(GetElement(str1,4));
+   multp=StringToDouble(GetElement(str1,5));
    filehandle=FileOpen(GetElement(str1,2),FILE_READ|FILE_TXT);
    FileSeek(filehandle,0,SEEK_SET);
    string tmp01;
@@ -112,7 +113,8 @@ int DeltaMasLength(string symbol, int tf, int period_ma_slow, int period_ma_fast
 
    double tmp3_2=MathAbs(iCCI2(symbol,tf,10,period_ma_slow,period_ma_fast,cci_period));
    double tmp3_3=MathAbs(iCCI2(symbol,tf,18,period_ma_slow,period_ma_fast,cci_period));
-   if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3))){
+   if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3)))
+   {
       double tmp4=MathAbs(iCCI2(symbol,tf,0,period_ma_slow,period_ma_fast,cci_period));
       double tmp5=MathAbs(iCCI2(symbol,tf,1,period_ma_slow,period_ma_fast,cci_period));
       if(tmp4<=tmp5)
@@ -184,9 +186,9 @@ void OnTick()
             if(OrderOpenTime()<(TimeCurrent()-StringToInteger(OrderComment()) ))
               {
                if(OrderType()==OP_BUY)
-                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close "+OrderProfit());}
+                  {if(!TradeSundaySaturday && (DayOfWeek()<2 || DayOfWeek()==6)){;}else OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close "+OrderProfit());}
                else
-                  {OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_ASK),3,Violet);Alert(config[i2][1]+" SELL Close "+OrderProfit());}
+                  {if(!TradeSundaySaturday && (DayOfWeek()<2 || DayOfWeek()==6)){;}else OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_ASK),3,Violet);Alert(config[i2][1]+" SELL Close "+OrderProfit());}
               }
       }
      }
@@ -213,36 +215,41 @@ void OnTick()
        StringToInteger(GetElement(config[i2][2+i3],2)),
        StringToInteger(GetElement(config[i2][2+i3],3)));
       if(MathAbs(signal)<21)continue; 
-      double takeprofit = StringToInteger(GetElement(config[i2][2+i3],4))*MarketInfo(config[i2][1],MODE_POINT);
+      double takeprofits = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],4))*multp*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double takeprofitb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],11))*multp*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplosss = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],9))*mulsl*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplossb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],10))*mulsl*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
       string s1=GetElement(config[i2][2+i3],5);
       string s2="17280"+StringSubstr(s1,StringLen(s1)-1,1);
-      double stoplevel =MarketInfo(config[i2][1],MODE_STOPLEVEL);
+      //double stoplevel =MarketInfo(config[i2][1],MODE_STOPLEVEL);
       int t1=0;
       
-       if((stoplevel<takeprofit)||(stoplevel<1)){
+       //if((stoplevel<takeprofit)||(stoplevel<1))
+       if(!TradeSundaySaturday && (DayOfWeek()==0 || DayOfWeek()==6)){;}else
+       {
          if(signal>0)
            {
             for(i1=0;i1<1;i1++){
                res=-1;while(res==-1){
-                  res=OrderSend(config[i2][1],OP_SELL,0.01,MarketInfo(config[i2][1],MODE_BID),3,0,MarketInfo(config[i2][1],MODE_BID)-takeprofit,s2,0,0,Red);
+                  res=OrderSend(config[i2][1],OP_SELL,Lot,MarketInfo(config[i2][1],MODE_BID),3,MarketInfo(config[i2][1],MODE_ASK)+stoplosss,MarketInfo(config[i2][1],MODE_ASK)-takeprofits,s2,0,0,Red);
                   //res=OrderSend(config[i2][1],OP_BUYSTOP,0.01,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_ASK)+StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Blue);
                   //res=OrderSend(cindex[i2][1],OP_SELLLIMIT,0.01,Bid+GetElement(config[i2][2+i3],4)*Point/2,3,0,Bid-GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Red);
                //Print("ERROR: "+GetLastError());
                   t1++;if(t1>5)res=0;Sleep(1000);}
             }
-            Alert(config[i2][1]+" SELL");
+           // Alert(config[i2][1]+" SELL");
            }
          if(signal<0)
            {
             for(i1=0;i1<1;i1++){
                res=-1;while(res==-1){
-                  res=OrderSend(config[i2][1],OP_BUY,0.01,MarketInfo(config[i2][1],MODE_ASK),3,0,MarketInfo(config[i2][1],MODE_ASK)+takeprofit,s2,0,0,Blue);
+                  res=OrderSend(config[i2][1],OP_BUY,Lot,MarketInfo(config[i2][1],MODE_ASK),3,MarketInfo(config[i2][1],MODE_BID)-stoplossb,MarketInfo(config[i2][1],MODE_BID)+takeprofitb,s2,0,0,Blue);
                   //res=OrderSend(config[i2][1],OP_SELLSTOP,0.01,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*2,3,0,MarketInfo(config[i2][1],MODE_BID)-StringToInteger(GetElement(config[i2][2+i3],4))*Point*3,GetElement(config[i2][2+i3],5),0,TimeCurrent()+60*10,Red);
                   //res=OrderSend(cindex[i2][1],OP_BUYLIMIT,0.01,Ask-GetElement(config[i2][2+i3],4)*Point/2,3,0,Ask+GetElement(config[i2][2+i3],4)*Point/2,"",0,TimeCurrent()+1440*60/2,Blue);
                //Print("ERROR: "+GetLastError());   
                  t1++;if(t1>5)res=0;Sleep(1000);}
             }
-            Alert(config[i2][1]+" BUY");
+           // Alert(config[i2][1]+" BUY");
            }
          }
      }
