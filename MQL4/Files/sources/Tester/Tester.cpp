@@ -275,6 +275,24 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 	}
 	return 0;	
 }
+int iLowest(int count, int start){
+	double Low=99999999;int cLow=0;
+	for(int i = start;i > start-count;i--)
+	{
+		if(testermetadata->low[i]<Low){
+		Low=testermetadata->low[i];cLow=i;}
+	}
+	return(cLow);
+}
+int iHighest(int count, int start){
+	double High=-99999999;int cHigh=0;
+	for(int i = start;i > start-count;i--)
+	{
+		if(testermetadata->high[i]>High){
+		High=testermetadata->high[i];cHigh=i;}
+	}
+	return(cHigh);
+}
 void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period,int tpsell,int slsell,int slbuy,int tpbuy, tresults &result){
 	double orderopenpricebuy,orderopenpricesell;
 	int orderopenedsell=0,orderopenedbuy=0;
@@ -315,13 +333,15 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 		}		
 		
 		int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-		if(abs(signal)>20){
+		if(abs(signal)>9){
+			//if((signal>0)&&(orderopenedsell==0)&&(iLowest(19,tcurbar)>10)&&(iHighest(19,tcurbar)<5)) {
 			if((signal>0)&&(orderopenedsell==0)){
 				orderopenedsell=1;//OP_SELL;
 				orderopentimesell=i;
 				orderopenpricesell=testermetadata->open[i];
 				//break;
 			}else
+			//if((signal<0)&&(orderopenedbuy==0)&&(iLowest(19,tcurbar)<5)&&(iHighest(19,tcurbar)>10)) {
 			if((signal<0)&&(orderopenedbuy==0)){
 				orderopenedbuy=1;//OP_BUY;
 				orderopentimebuy=i;

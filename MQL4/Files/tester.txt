@@ -1,37 +1,33 @@
-totalloss : 68230
-totalprofit : 355685
-totalprofitorders : 36
-totalnotprofitorders : 6
-midtimeout : 248 minutes
+totalloss : 54
+totalprofit : 117
+totalprofitorders : 11
+totalnotprofitorders : 49
+midtimeout : 105 minutes
 
-
-[ Timeframe 5 ]
-Filecoin 0 0 0 0 0
-Cardano 0 0 0 0 0
-Solana 0 201 1 0 75
 
 [ Timeframe 15 ]
-#Bitcoin 0 67828 1 0 390
-#Litecoin 0 286 1 0 45
-#Ripple 0 136 2 0 330
-Doge 0 379 1 0 90
-Filecoin 1252 387 1 1 75
-Cardano 0 1986 1 0 45
-BCHUSD 0 490 1 0 330
-Chainlink 0 47880 3 0 510
-Polkadot 7488 0 0 1 315
-Solana 0 288 1 0 45
-Uniswap 228 228 1 1 525
+EURJPY 17 0 0 1 120
+GBPUSD 0 0 0 0 0
+USDCAD 0 0 0 2 30
+AUDCHF 0 9 3 6 135
+NZDCAD 3 0 0 3 225
 
 [ Timeframe 30 ]
-#Bitcoin 58650 16875 1 1 270
-#Ethereum 0 12590 2 0 900
-#Ripple 0 207 2 0 480
-Doge 0 1460 4 0 1800
-Cardano 0 4101 1 0 330
-BCHUSD 0 1275 2 0 480
-Chainlink 0 169713 3 0 840
-Polkadot 0 27818 3 0 1140
-Solana 612 612 2 2 330
-Uniswap 0 945 2 0 1080
+EURUSD 3 0 0 6 180
+NZDUSD 8 0 0 4 240
+USDCAD 0 0 0 2 60
+USDCHF 3 0 0 2 1470
+AUDJPY 4 0 0 5 390
+
+[ Timeframe 60 ]
+AUDUSD 0 12 2 0 180
+EURUSD 2 0 0 1 1140
+GBPUSD 0 0 0 2 120
+USDCAD 4 0 0 5 300
+AUDCAD 1 0 0 2 360
+AUDJPY 1 0 0 1 180
+CADCHF 6 0 0 2 180
+CADJPY 0 36 2 1 540
+EURAUD 2 42 1 2 180
+GBPJPY 0 18 3 2 300
 
