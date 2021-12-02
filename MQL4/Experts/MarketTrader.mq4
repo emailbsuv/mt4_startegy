@@ -1,23 +1,20 @@
-﻿#property copyright "Copyright 2021, Suvorov Bogdan"
+#property copyright "Copyright 2021, Suvorov Bogdan"
 #property link      "https://t.me/markettraderoptimizer"
 #property description "MarketTrader expert advisor"
 
-#property strict
-
-input bool TradeSundaySaturday = true;    //Торговать в выходные
-input double Lot = 0.01;                  //Стартовый лот
+input bool TradeSundaySaturday=true;
+input double Lot=0.01;
 
 int lastorder,firststart;
 string config[200][9];
 int cindex,cindex1=0,cindex2=1;
 double prevbar;
 double mulsl,multp;
-
 int OnInit()
   {
    int filehandle;
    string str1;
-   prevbar = iOpen(NULL,PERIOD_M5,0);
+   prevbar=iOpen(NULL,0,0);
    firststart=1;
    filehandle=FileOpen("settings.txt",FILE_READ|FILE_TXT);
    FileSeek(filehandle,0,SEEK_SET);
@@ -174,20 +171,19 @@ void OnTick()
   {
    int i1,i2,i3;
    double tmp001;
-   int orders_total = OrdersTotal();
    
-   if(prevbar==iOpen(NULL,PERIOD_M5,0))return;
-   prevbar = iOpen(NULL,PERIOD_M5,0);
    
-   for(i1=0; i1<cindex; i1++)for(i2=0; i2<StrToInteger(config[i1][0]); i2++) tmp001=iClose(config[i1][1],config[i1][StrToInteger(GetElement(config[i1][2+i2],0))],0);
+   if(prevbar==iOpen(NULL,0,0))return;
+   prevbar=iOpen(NULL,0,0);
+   for(i1=0; i1<cindex; i1++)for(i2=0; i2<config[i1][0]; i2++) tmp001=iClose(config[i1][1],config[i1][StringToInteger(GetElement(config[i1][2+i2],0))],0);
 
-   for(i2=0; i2<cindex; i2++)
-   for(i3=0; i3<StrToInteger(config[i2][0]); i3++)
-   for(i1=0; i1<orders_total; i1++)
+   for(i2=0;i2<cindex;i2++)
+   for(i3=0;i3<StringToInteger(config[i2][0]);i3++)
+   for(i1=0;i1<OrdersTotal();i1++)
      {
       OrderSelect(i1,SELECT_BY_POS,MODE_TRADES);
       if(OrderSymbol()==config[i2][1]){       
-            if(OrderOpenTime() < TimeCurrent()-StrToInteger(OrderComment()))
+            if(OrderOpenTime()<(TimeCurrent()-StringToInteger(OrderComment()) ))
               {
                if(OrderType()==OP_BUY)
                   {if(!TradeSundaySaturday && (DayOfWeek()<2 || DayOfWeek()==6)){;}else OrderClose(OrderTicket(),OrderLots(),MarketInfo(config[i2][1],MODE_BID),3,Violet);Alert(config[i2][1]+" BUY Close "+OrderProfit());}
@@ -196,14 +192,13 @@ void OnTick()
               }
       }
      }
-     
-   int res;
+   int    res;
    
-   if(orders_total < 511)
+   if(OrdersTotal()<511)
    for(i2=0;i2<cindex;i2++)
-   for(i3=0;i3<StrToInteger(config[i2][0]);i3++)   
+   for(i3=0;i3<StringToInteger(config[i2][0]);i3++)   
    if(CheckRestriction(config[i2][1], GetElement(config[i2][2+i3],5) )==0)
-   if(StrToInteger(GetElement(config[i2][2+i3],1))>0)
+   if(StringToInteger(GetElement(config[i2][2+i3],1))>0)
    //if(Delta2MasLength(config[i2][1],
    //    StringToInteger(GetElement(config[i2][2+i3],0)),
    //    StringToInteger(GetElement(config[i2][2+i3],1)),
@@ -215,26 +210,17 @@ void OnTick()
    //    StringToInteger(GetElement(config[i2][2+i3+1],3)))==1)
      {
       int signal=DeltaMasLength(config[i2][1],
-       StrToInteger(GetElement(config[i2][2+i3],0)),
-       StrToInteger(GetElement(config[i2][2+i3],1)),
-       StrToInteger(GetElement(config[i2][2+i3],2)),
-       StrToInteger(GetElement(config[i2][2+i3],3)));
-       
-      if(MathAbs(signal) < 9)continue; 
-      
-      double stoplevel = NormalizeDouble(MarketInfo(config[i2][1],MODE_STOPLEVEL)*MarketInfo(config[i2][1],MODE_POINT), (int)MarketInfo(config[i2][1],MODE_DIGITS));
-      double takeprofits = NormalizeDouble(StrToInteger(GetElement(config[i2][2+i3],4))*multp*MarketInfo(config[i2][1],MODE_POINT),(int)MarketInfo(config[i2][1],MODE_DIGITS));
-      double takeprofitb = NormalizeDouble(StrToInteger(GetElement(config[i2][2+i3],11))*multp*MarketInfo(config[i2][1],MODE_POINT),(int)MarketInfo(config[i2][1],MODE_DIGITS));
-      double stoplosss = NormalizeDouble(StrToInteger(GetElement(config[i2][2+i3],9))*mulsl*MarketInfo(config[i2][1],MODE_POINT),(int)MarketInfo(config[i2][1],MODE_DIGITS));
-      double stoplossb = NormalizeDouble(StrToInteger(GetElement(config[i2][2+i3],10))*mulsl*MarketInfo(config[i2][1],MODE_POINT),(int)MarketInfo(config[i2][1],MODE_DIGITS));
-      
-      if(takeprofits < stoplevel)takeprofits = stoplevel;     /// актуально для многих брокеров
-      if(takeprofitb < stoplevel)takeprofitb = stoplevel;
-      if(stoplosss < stoplevel)stoplosss = stoplevel;
-      if(stoplossb < stoplevel)stoplossb = stoplevel;
-      
-      string s1 = GetElement(config[i2][2+i3],5);
-      string s2 = "17280"+StringSubstr(s1,StringLen(s1)-1,1);
+       StringToInteger(GetElement(config[i2][2+i3],0)),
+       StringToInteger(GetElement(config[i2][2+i3],1)),
+       StringToInteger(GetElement(config[i2][2+i3],2)),
+       StringToInteger(GetElement(config[i2][2+i3],3)));
+      if(MathAbs(signal)<21)continue; 
+      double takeprofits = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],4))*multp*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double takeprofitb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],11))*multp*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplosss = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],9))*mulsl*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      double stoplossb = NormalizeDouble(StringToInteger(GetElement(config[i2][2+i3],10))*mulsl*MarketInfo(config[i2][1],MODE_POINT),MarketInfo(config[i2][1],MODE_DIGITS));
+      string s1=GetElement(config[i2][2+i3],5);
+      string s2="17280"+StringSubstr(s1,StringLen(s1)-1,1);
       //double stoplevel =MarketInfo(config[i2][1],MODE_STOPLEVEL);
       int t1=0;
       
