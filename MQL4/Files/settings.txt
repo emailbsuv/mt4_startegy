@@ -1,1 +1,1 @@
-1300 5 contests1.txt 0 1.0 1.0 "InstaForex-1Demo.com"
+1300 5 contests1.txt 200 1.0 1.0 "InstaForex-1Demo.com"
