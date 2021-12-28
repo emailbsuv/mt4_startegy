@@ -6,6 +6,7 @@
 #include <time.h>
 #include <windows.h>
 #include <Mmsystem.h>
+#include <process.h>
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -78,6 +79,7 @@ int randbytes[128][257];
 
 char config[200][9][100];int cindex=0;
 char t1config[1000][100];
+char t1config2[200];
 
 inline int rdtsc(){__asm__ __volatile__("rdtsc");}	
 void initrandbytes(){
@@ -780,7 +782,7 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	
 	return 0;
 }
-const char* testertest(const char* ctf,double point, const char* ctimeout) {
+const char* testertest(const char* ctf,double point, const char* ctimeout,int spr) {
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
@@ -850,7 +852,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout) {
 	lstrcat(itemconfig,intToStr(cci_period));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(tps));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,ctimeout);lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(profitcntpoints));lstrcat(itemconfig," ");
+	lstrcat(itemconfig,intToStr(spr));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(notprofitcntorders));lstrcat(itemconfig," ");	
 	lstrcat(itemconfig,intToStr(profitcntorders));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(sls));lstrcat(itemconfig," ");
@@ -1095,10 +1097,10 @@ void ZigZag(double Point){
 	extremums->midprofit = (profit/(extremums->barscnt-2)/2);
 }
 
-const char* optimize(const char* symbol,const char* tf, const char* timeout) {
+const char* optimize(const char* symbol,const char* tf, const char* timeout,int spr) {
 	double point = loadHST(symbol,tf);
 	ZigZag(point);
-	return (const char *)testertest(tf,point,timeout);
+	return (const char *)testertest(tf,point,timeout,spr);
 }
 void ReadConfig(){
 	
@@ -1178,6 +1180,35 @@ void ReadConfig(){
 
 	
 }
+char* SetElement(char* str, int index,char* str2){
+	char* membuf = new char[2];membuf = (char*)realloc(membuf,300);memset(membuf,0,300);
+	int tconfigindex=0;
+	lstrcat(membuf,str);
+
+	char* ptr=&membuf[0];char* prevptr=&membuf[0];tconfigindex=0;
+	while(ptr!=NULL){
+	char symbol1=' ';
+	char symbol2='\0';
+	ptr=strchr (prevptr,symbol1);
+		if (ptr!=NULL){
+			*ptr=symbol2;
+			memset(&t1config[tconfigindex][0],0,100);
+			lstrcat(&t1config[tconfigindex][0],prevptr);
+			tconfigindex++;
+			prevptr=ptr+1;
+		}
+	}
+	memset(&t1config[tconfigindex][0],0,100);
+	lstrcat(&t1config[tconfigindex][0],prevptr);
+	tconfigindex++;	
+	delete[] membuf;
+	memset(&t1config[index][0],0,100);
+	lstrcat(&t1config[index][0],str2);
+	int i;
+	for(i=0;i<tconfigindex-1;i++){lstrcat(t1config2,&t1config[i][0]);lstrcat(t1config2," ");}
+	lstrcat(t1config2,&t1config[i][0]);
+	return &t1config2[0];
+}
 char* GetElement(char* str, int index){
 	char* membuf = new char[2];membuf = (char*)realloc(membuf,300);memset(membuf,0,300);
 	int tconfigindex=0;
@@ -1240,9 +1271,44 @@ void SaveConfig(){
 	fclose(os);
 	delete[] membuf;	
 }
-int main(int argc, char *argv[]){
+size_t to_narrow(const wchar_t * src, char * dest, size_t dest_len){
+  size_t i;
+  wchar_t code;
 
+  i = 0;
+
+  while (src[i] != '\0' && i < (dest_len - 1)){
+    code = src[i];
+    if (code < 128)
+      dest[i] = char(code);
+    else{
+      dest[i] = '?';
+      if (code >= 0xD800 && code <= 0xD8FF)
+        // lead surrogate, skip the next code unit, which is the trail
+        i++;
+    }
+    i++;
+  }
+
+  dest[i] = '\0';
+
+  return i - 1;
+
+}
+int time1(const time_t st) {
+     tm stm1;
+     time_t st1;
+    st1=time(0);
+	memset(&stm1,0,sizeof(struct tm));
+	if(st==0)
+	stm1=*localtime((const time_t *)&st1);
+	else
+	stm1=*localtime((const time_t *)&st);
+	return (int)mktime(&stm1);
+}
+int main(int argc, char *argv[]){
 	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
+	SleepEx(5000,true);
 	double title1,dt0=time(NULL);
 	rdtsc();
 	srand(time(0));
@@ -1250,7 +1316,7 @@ int main(int argc, char *argv[]){
 
 	pathCONFIG = new char[500];memset(pathCONFIG,0,500);lstrcat(pathCONFIG,argv[3]);
 	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
-	tfdepth = strToInt(argv[2]);bars = strToInt(argv[1]);
+	tfdepth = 10;bars = strToInt(argv[1]);
 	timeshift = strToInt(argv[4]);
 	//if(bars<=(timeshift+1500))bars=timeshift+1500;
 	char *stm1;stm1 = (char *)malloc(400000);memset(stm1,0,400000);
@@ -1269,7 +1335,8 @@ int main(int argc, char *argv[]){
 			memset(tf,0,10);memset(timeout,0,60);memset(optresult,0,300);
 			lstrcat(tf,GetElement(&config[i1][i2+2][0],0));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
-			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout));
+			int spr = strToInt(GetElement(&config[i1][i2+2][0],6));
+			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout,spr));
 			printf(optresult);printf("\r\n");
 			PatchConfig(&config[i1][1][0],optresult);
 		}else {
@@ -1289,5 +1356,34 @@ int main(int argc, char *argv[]){
 	free(pathCONFIG);
 	delete[] extremums;
 	delete[] testermetadata;
+
+
+
+	FILE *hFile;
+	wchar_t path1[255];GetCurrentDirectoryW(255,path1);
+	char path[255];memset(path,0,255);to_narrow(path1, path, 255);
+	lstrcat(path,"\\settings.txt");
+	char* str1 = new char[2];str1 = (char*)realloc(str1,500);memset(str1,0,500);
+	hFile = fopen(path, "rb");
+	if(!(!hFile)){
+		fseek(hFile,0,SEEK_END);
+		int dwFileSize = ftell(hFile);
+		fseek(hFile,0,SEEK_SET);
+		fread(str1,dwFileSize,1,hFile);
+		fclose(hFile);
+	}
+	str1 = SetElement(str1,1,intToStr(time1(NULL)+60*60*10));
+	hFile = fopen(path, "wb");
+	if(!(!hFile)){
+		fseek(hFile,0,SEEK_SET);
+		fwrite(str1,strlen(str1),1,hFile);
+		fclose(hFile);
+	}
+	
+	wchar_t tt[255];GetCurrentDirectoryW(255,tt);
+	char tt1[255];memset(tt1,0,255);to_narrow(tt, tt1, 255);
+	lstrcat(tt1,"\\TesterStart.bat");
+    _execlp(tt1, tt1, "", "", "", "", nullptr);
+
 	
 }

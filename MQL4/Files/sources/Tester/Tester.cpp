@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include "winsock2.h"
+#include <process.h>
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -32,6 +33,7 @@
 
 char* pathCONFIG;
 char* pathRESULTS;
+char* ident;
 
 
 int bars,ibars;
@@ -537,6 +539,15 @@ char* SaveResults(){
 
 	int tf,i3,i4=0;
 	int totalloss=0,totalprofit=0,totalprofitorders=0,totalnotprofitorders=0,midtimeout=0;
+	int Ttotalloss[9],Ttotalprofit[9],Ttotalprofitorders[9],Ttotalnotprofitorders[9],Tmidtimeout[9];
+	int Ytotalloss=0,Ytotalprofit=0,Ytotalprofitorders=0,Ytotalnotprofitorders=0,Ymidtimeout=0;
+	for(int i=0;i<9;i++){
+		Ttotalloss[i]=0;
+		Ttotalprofit[i]=0;
+		Ttotalprofitorders[i]=0;
+		Ttotalnotprofitorders[i]=0;
+		Tmidtimeout[i]=0;
+	}
 	double maxtf=0.0;
 	for(tf=0; tf<9; tf++)
 	{
@@ -550,17 +561,34 @@ char* SaveResults(){
 		   totalprofitorders+= strToInt( GetElement(&snipertxt[tf][i2+1][0],3) );
 		   totalnotprofitorders+= strToInt( GetElement(&snipertxt[tf][i2+1][0],4) );
 		   midtimeout+= strToInt( GetElement(&snipertxt[tf][i2+1][0],5) );
+		   
+			Ttotalloss[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],1) );
+			Ttotalprofit[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],2) );
+			Ttotalprofitorders[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],3) );
+			Ttotalnotprofitorders[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],4) );
+			Tmidtimeout[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],5) );
 		   i4++;
 		   if(strToInt(&snipertxt[tf][0][0])>0)if(maxtf<(double)i3)maxtf=(double)i3;
 		  }
 		}
 		
 	}
+	for(tf=0; tf<9; tf++)
+	{
+	     if(tf==0)i3=1;if(tf==1)i3=5;if(tf==2)i3=15;if(tf==3)i3=30;if(tf==4)i3=60;if(tf==5)i3=240;
+	     if(tf==6)i3=1440;if(tf==7)i3=10080;if(tf==8)i3=43200;
+			Ytotalloss+=Ttotalloss[tf]*(maxtf/i3);
+			Ytotalprofit+=Ttotalprofit[tf]*(maxtf/i3);
+			Ytotalprofitorders+=Ttotalprofitorders[tf]*(maxtf/i3);
+			Ytotalnotprofitorders+=Ttotalnotprofitorders[tf]*(maxtf/i3);
+			Ymidtimeout+=Tmidtimeout[tf]*(maxtf/i3);
+	}
 	maxtf=(double)timeshift*maxtf;
-	if((totalprofitorders+totalnotprofitorders)>0)midtimeout = (int)(midtimeout/(totalprofitorders+totalnotprofitorders)); else midtimeout=0;
+	if((Ytotalprofitorders+Ytotalnotprofitorders)>0)midtimeout = (int)(Ymidtimeout/(Ytotalprofitorders+Ytotalnotprofitorders)); else midtimeout=0;
 	double ordersperday,pipsperday;
-	ordersperday=((double)(totalprofitorders+totalnotprofitorders)/(double)maxtf)*(double)1440.0;
-	pipsperday=((double)(totalprofit-totalloss)/(double)maxtf)*(double)1440.0;
+	ordersperday=((double)(Ytotalprofitorders+Ytotalnotprofitorders)/(double)maxtf)*(double)1440.0;
+	pipsperday=((double)(Ytotalprofit-Ytotalloss)/(double)maxtf)*(double)1440.0;
+	lstrcat(membuf,ident);lstrcat(membuf,"\r\n");
 	lstrcat(membuf,"koef SL : "); lstrcat(membuf,doubleToStr(mulsl,3));
 	lstrcat(membuf,", koef TP : "); lstrcat(membuf,doubleToStr(multp,3));lstrcat(membuf,"\r\n");
 	lstrcat(membuf,"bars shift : "); lstrcat(membuf,intToStr(timeshift));lstrcat(membuf,"\r\n");
@@ -571,6 +599,26 @@ char* SaveResults(){
 	lstrcat(membuf,"frequency : "); lstrcat(membuf,doubleToStr(ordersperday,2));lstrcat(membuf," orders per day\r\n");
 	lstrcat(membuf,"clear profit : "); lstrcat(membuf,doubleToStr(pipsperday,2));lstrcat(membuf," pips per day\r\n");
 	lstrcat(membuf,"middle order lifetime : "); lstrcat(membuf,intToStr(midtimeout));lstrcat(membuf," minutes\r\n");
+	
+	lstrcat(&totalresults[0],"\r\n\r\n");lstrcat(&totalresults[0],membuf);
+	
+	lstrcat(membuf,"\r\n\r\n");
+	
+	for(tf=0; tf<9; tf++)
+	{
+		if(strlen(&snipertxt[tf][0][0])>0){
+	     if(tf==0)i3=1;if(tf==1)i3=5;if(tf==2)i3=15;if(tf==3)i3=30;if(tf==4)i3=60;if(tf==5)i3=240;
+	     if(tf==6)i3=1440;if(tf==7)i3=10080;if(tf==8)i3=43200;
+		 if(strToInt(&snipertxt[tf][0][0])>0)
+		  {lstrcat(membuf,"[ Timeframe ");lstrcat(membuf,intToStr(i3));lstrcat(membuf," ]\r\n");}
+		 for(int i2=0; i2<strToInt(&snipertxt[tf][0][0]); i2++)
+		  {
+		   lstrcat(membuf,&snipertxt[tf][i2+1][0]);lstrcat(membuf,"\r\n");
+		   if(i2==(strToInt(&snipertxt[tf][0][0])-1))
+			  lstrcat(membuf,"\r\n");
+		  }
+		}
+	}	
 
 
 
@@ -585,8 +633,8 @@ char* SaveResults(){
    lstrcat(buff,src_str);
    int t;
    t=strlen(membuf);memcpy(&buff[0],&t,4);
-   t=6;memcpy(&buff[4],&t,4);
-   t=7;memcpy(&buff[8],&t,4);
+   t=totalprofit;memcpy(&buff[4],&t,4);
+   t=totalloss;memcpy(&buff[8],&t,4);
    t=strlen(src_str);memcpy(&buff[12],&t,4);
    int bufflen = 16+strlen(membuf)+strlen(src_str);
    //printf(&buff[16]);return 0;
@@ -611,31 +659,10 @@ char* SaveResults(){
    WSACleanup();
    
    free(buff);
-   free(src_str);
+   free(src_str);	
+	
 	
 
-
-
-	
-	lstrcat(&totalresults[0],"\r\n\r\n");lstrcat(&totalresults[0],membuf);
-	
-	lstrcat(membuf,"\r\n\r\n");
-	
-	for(tf=0; tf<9; tf++)
-	{
-		if(strlen(&snipertxt[tf][0][0])>0){
-	     if(tf==0)i3=1;if(tf==1)i3=5;if(tf==2)i3=15;if(tf==3)i3=30;if(tf==4)i3=60;if(tf==5)i3=240;
-	     if(tf==6)i3=1440;if(tf==7)i3=10080;if(tf==8)i3=43200;
-		 if(strToInt(&snipertxt[tf][0][0])>0)
-		  {lstrcat(membuf,"[ Timeframe ");lstrcat(membuf,intToStr(i3));lstrcat(membuf," ]\r\n");}
-		 for(int i2=0; i2<strToInt(&snipertxt[tf][0][0]); i2++)
-		  {
-		   lstrcat(membuf,&snipertxt[tf][i2+1][0]);lstrcat(membuf,"\r\n");
-		   if(i2==(strToInt(&snipertxt[tf][0][0])-1))
-			  lstrcat(membuf,"\r\n");
-		  }
-		}
-	}	
 	
 	int tmp0=strlen(membuf);
 	fwrite(membuf,tmp0,1,os);
@@ -654,10 +681,12 @@ int main(int argc, char *argv[]){
 
     pathCONFIG = new char[500];memset(pathCONFIG,0,500);lstrcat(pathCONFIG,argv[3]);
 	pathRESULTS = new char[500];memset(pathRESULTS,0,500);lstrcat(pathRESULTS,pathCONFIG);lstrcat(pathRESULTS,"-RESULTS.txt");
+	ident = new char[500];memset(ident,0,500);lstrcat(ident,argv[8]);
+	char* terminal = new char[500];memset(terminal,0,500);lstrcat(terminal,argv[9]);
 	
 	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
 	timeshift = strToInt(argv[4]);bars = strToInt(argv[1]);
-	//if((timeshift+300)>bars)bars=timeshift+300;
+	if(timeshift==0){timeshift=400; bars-=400;}
 	mulsl = strtod(argv[5], NULL);
 	multp = strtod(argv[6], NULL);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
@@ -704,5 +733,7 @@ int main(int argc, char *argv[]){
 	MessageBeep(MB_OK);
     free(stm1);
 	delete[] testermetadata;
+	
+	_execlp(terminal, "cmd.exe", "/c", "", "", "", nullptr);
 	
 }
