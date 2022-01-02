@@ -313,9 +313,9 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 	int orderopenedsell=0,orderopenedbuy=0;
 	int orderopentimebuy,orderopentimesell;
 	int totalloss=0,totalprofit=0,totalprofitorders=0,totalnotprofitorders=0,totaltimeout=0;
-	int tcurbar;
+	int tcurbar,i;
 
-	for(int i=bars-timeshift;i<bars;i++){
+	for(i=bars-timeshift;i<bars;i++){
 		tcurbar=i;
 		
 		if(orderopenedsell==1){
@@ -372,6 +372,37 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 		
 	}
 
+	i=bars-1;
+	
+	if(orderopenedsell==1){
+		if( testermetadata->high[i] >= (orderopenpricesell) ){
+			orderopenedsell=0;
+			totalloss+=abs((testermetadata->high[i]-orderopenpricesell)/point);
+			totalnotprofitorders++;
+			totaltimeout+=i-orderopentimesell;
+		}
+		if( testermetadata->low[i] <= (orderopenpricesell) ){
+			orderopenedsell=0;
+			totalprofit+=abs((orderopenpricesell-testermetadata->low[i])/point);
+			totalprofitorders++;
+			totaltimeout+=i-orderopentimesell;
+		}
+	}
+	if(orderopenedbuy==1){
+		if( testermetadata->high[i] >= (orderopenpricebuy) ){
+			orderopenedbuy=0;
+			totalprofit+=abs((testermetadata->high[i]-orderopenpricebuy)/point);
+			totalprofitorders++;
+			totaltimeout+=i-orderopentimebuy;
+		}
+		if( testermetadata->low[i] <= (orderopenpricebuy) ){
+			orderopenedbuy=0;
+			totalloss+=abs((orderopenpricebuy-testermetadata->low[i])/point);
+			totalnotprofitorders++;
+			totaltimeout+=i-orderopentimebuy;
+		}
+	}	
+	
 	result.totalloss=totalloss;
 	result.totalprofit=totalprofit;
 	result.totalprofitorders=totalprofitorders;
@@ -690,7 +721,7 @@ int main(int argc, char *argv[]){
 	mulsl = strtod(argv[5], NULL);
 	multp = strtod(argv[6], NULL);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
-	char tf[5];memset(tf,0,5);char timeout[10];memset(timeout,0,10);
+	char tf[15];memset(tf,0,15);char timeout[30];memset(timeout,0,30);
 	int tpbuy,tpsell,slsell,slbuy;
 	int ma1,ma2,cci1,ma1_2,ma2_2,cci1_2;
 	char optresult[100];memset(optresult,0,100);
@@ -703,7 +734,7 @@ int main(int argc, char *argv[]){
 	for(int i1=0;i1<cindex;i1++){
 		for(int i2=0;i2<strToInt(&config[i1][0][0]);i2++)
 		if(strToInt(GetElement(&config[i1][i2+2][0],1))>0){
-			memset(tf,0,5);memset(timeout,0,10);memset(optresult,0,100);
+			memset(tf,0,15);memset(timeout,0,30);memset(optresult,0,100);
 			tpbuy=strToInt(GetElement(&config[i1][i2+2][0],11));tpbuy*=multp;if(tpbuy<1)tpbuy=1;
 			tpsell=strToInt(GetElement(&config[i1][i2+2][0],4));tpsell*=multp;if(tpsell<1)tpsell=1;
 			slsell=strToInt(GetElement(&config[i1][i2+2][0],9));slsell*=mulsl;if(slsell<1)slsell=1;
@@ -735,5 +766,6 @@ int main(int argc, char *argv[]){
 	delete[] testermetadata;
 	
 	_execlp(terminal, "cmd.exe", "/c", "", "", "", nullptr);
+	//_execlp(terminal, terminal, "/portable", "", "", "", nullptr);
 	
 }
