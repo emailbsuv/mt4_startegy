@@ -1,3 +1,6 @@
+v0.891 stable - date 29.01.2022
+Исправлены ошибки в MarketTrader.mq4, sources\Tester\make.bat , sources\MarketTraderOptimizer\make.bat . Изменён sources\Readme.txt
+
 v0.89 stable - date 02.01.2022
 Исправлены ошибки в MarketTrader.mq4, Tester.cpp . Изменён Readme.txt
 

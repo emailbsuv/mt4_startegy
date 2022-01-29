@@ -1,1 +1,1 @@
-g++ -m64 -mfpmath=sse -msse4.2 -mavx -march=sandybridge -mno-mmx -mtune=sandybridge MarketTraderOptimizer.cpp -o MarketTraderOptimizer.exe -lWinmm -w
+g++ -m32 -mfpmath=sse MarketTraderOptimizer.cpp -o MarketTraderOptimizer.exe -lWinmm -w

@@ -4,7 +4,7 @@
 
 http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download
 
-При установке выбираем Seh / x86_64
+При установке выбираем i686
 
 2. Добавляем системную переменную среды окружения Path в Windows 
 
