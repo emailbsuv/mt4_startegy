@@ -790,7 +790,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout,int sp
 
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
-	treadcount=sysinfo.dwNumberOfProcessors;//*tsocketscpucnt();
+	treadcount=sysinfo.dwNumberOfProcessors - 1;//*tsocketscpucnt();
 	tthread threads[treadcount];
 	for(int i=0;i<treadcount;i++){
 		threads[i].done = false;

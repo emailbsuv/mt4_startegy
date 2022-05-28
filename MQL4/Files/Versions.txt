@@ -1,3 +1,6 @@
+v0.892 stable - date 29.01.2022
+Снижена нагрузка на процессор, используется в оптимизации на одно ядро процессора меньше. Чтобы избежать конфликтов с датацентрами предоставляющими VPS.
+
 v0.891 stable - date 29.01.2022
 Исправлены ошибки в MarketTrader.mq4, sources\Tester\make.bat , sources\MarketTraderOptimizer\make.bat . Изменён sources\Readme.txt
 
