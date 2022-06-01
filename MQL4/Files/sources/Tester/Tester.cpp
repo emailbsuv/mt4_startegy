@@ -60,7 +60,14 @@ struct tresults{
 	int totalnotprofitorders;
 	int midtimeout;
 };
-
+struct eresults{
+	double up;
+	double down;
+};
+struct sresults{
+	double K;
+	double D;
+};
 int testercurbar;
 int randptr=0,randbytes[257];
 
@@ -244,51 +251,122 @@ double loadHST(const char* symbol,const char* tf){
 	point = 1.0 / (int) pow((double)10, testerdigits);
 	return point;
 }
-double icci(int shift, int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
+double icci(int shift, int period_env, int period_env_k, int period_stoch_k,int tcurbar){
    double ma_fast,ma_slow;
    int i1;
-   ma_fast=ma_slow=cci(cci_period,shift,tcurbar)+10000.0;
-   for(i1=1; i1<period_ma_slow; i1++)
-      ma_slow=ma_slow+cci(cci_period,i1+shift,tcurbar)+10000.0;
-   ma_slow=ma_slow/period_ma_slow;
-   for(i1=1; i1<period_ma_fast; i1++)
-      ma_fast=ma_fast+cci(cci_period,i1+shift,tcurbar)+10000.0;
-   ma_fast=ma_fast/period_ma_fast;
+   ma_fast=ma_slow=cci(period_stoch_k,shift,tcurbar)+10000.0;
+   for(i1=1; i1<period_env_k; i1++)
+      ma_slow=ma_slow+cci(period_stoch_k,i1+shift,tcurbar)+10000.0;
+   ma_slow=ma_slow/period_env_k;
+   for(i1=1; i1<period_env; i1++)
+      ma_fast=ma_fast+cci(period_stoch_k,i1+shift,tcurbar)+10000.0;
+   ma_fast=ma_fast/period_env;
    return (ma_fast-ma_slow);	
 }
-int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tcurbar){
-/* 	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
-	double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
-	double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+int DeltaMasLength(int period_env, int period_env_k, int period_stoch_k,int tcurbar){
+/* 	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_env, period_env_k, period_stoch_k,tcurbar);tmp3=prevtmp1;
+	double tmp4=fabs(icci(0,period_env, period_env_k, period_stoch_k,tcurbar));
+	double tmp5=fabs(icci(1,period_env, period_env_k, period_stoch_k,tcurbar));
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
 	
 	if(tmp4<=tmp5)
-	if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
+	if(tmp3>fabs(icci(0,period_env, period_env_k, period_stoch_k,tcurbar)))
 		for(int i1=3;i1<200;i1++){
-			tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+			tmp1=fabs(icci(i1,period_env, period_env_k, period_stoch_k,tcurbar));
 			if(prevtmp1<tmp1) return (i1*tmp2);
 			prevtmp1=tmp1;
 		}
 	return 0; */
-	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_ma_fast, period_ma_slow, cci_period,tcurbar);tmp3=prevtmp1;
-	double tmp3_2=fabs(icci(10,period_ma_fast, period_ma_slow, cci_period,tcurbar));
-	double tmp3_3=fabs(icci(18,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+	double tmp1,tmp2,tmp3,prevtmp1=icci(2,period_env, period_env_k, period_stoch_k,tcurbar);tmp3=prevtmp1;
+	double tmp3_2=fabs(icci(10,period_env, period_env_k, period_stoch_k,tcurbar));
+	double tmp3_3=fabs(icci(18,period_env, period_env_k, period_stoch_k,tcurbar));
 	if(tmp3<0)tmp2=-1;else tmp2=1;
     prevtmp1=tmp3=fabs(tmp3);
 	
 	if((tmp3>(tmp3_2*1.2))&&(tmp3>(tmp3_3*1.3))){
-		double tmp4=fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar));
-		double tmp5=fabs(icci(1,period_ma_fast, period_ma_slow, cci_period,tcurbar));		
+		double tmp4=fabs(icci(0,period_env, period_env_k, period_stoch_k,tcurbar));
+		double tmp5=fabs(icci(1,period_env, period_env_k, period_stoch_k,tcurbar));		
 		if(tmp4<=tmp5)
-		if(tmp3>fabs(icci(0,period_ma_fast, period_ma_slow, cci_period,tcurbar)))
+		if(tmp3>fabs(icci(0,period_env, period_env_k, period_stoch_k,tcurbar)))
 			for(int i1=3;i1<200;i1++){
-				tmp1=fabs(icci(i1,period_ma_fast, period_ma_slow, cci_period,tcurbar));
+				tmp1=fabs(icci(i1,period_env, period_env_k, period_stoch_k,tcurbar));
 				if(prevtmp1<tmp1) return (i1*tmp2);
 				prevtmp1=tmp1;
 			}
 	}
 	return 0;	
+}
+void envelopes(const int period, int K0, const int shift,int tcurbar, eresults &result){
+	double sum=0.0,tmp;
+	double K = K0 / 100.0;
+	for(int i=0;i<period;i++)
+	{
+		sum+=testermetadata->close[tcurbar-(i+shift)];
+	}
+	tmp=sum;tmp/=period;
+	result.up = tmp* (1 + K / 100.0);
+	result.down = tmp* (1 - K / 100.0);
+}	
+
+void stochastic(const int InpKPeriod,const int InpDPeriod, const int shift,int tcurbar, sresults &result){
+	
+	double ExtMainBuffer[InpKPeriod*3];
+	double ExtSignalBuffer[InpKPeriod*3];
+	double ExtHighesBuffer[InpKPeriod*3];
+	double ExtLowesBuffer[InpKPeriod*3];	
+	int rates_total=InpKPeriod*2+4;
+    int pos=InpKPeriod-1,i,k,InpSlowing=3;
+	for(i=0; i<pos; i++)
+	{
+	 ExtLowesBuffer[i]=0.0;
+	 ExtHighesBuffer[i]=0.0;
+	}
+
+//--- calculate HighesBuffer[] and ExtHighesBuffer[]
+   for(i=0; i<(InpKPeriod+InpSlowing); i++)
+     {
+      double dmin=1000000.0;
+      double dmax=-1000000.0;
+      for(k=i; k<i+InpKPeriod; k++)
+        {
+         if(dmin>testermetadata->low[tcurbar-(k+shift)])
+            dmin=testermetadata->low[tcurbar-(k+shift)];
+         if(dmax<testermetadata->high[tcurbar-(k+shift)])
+            dmax=testermetadata->high[tcurbar-(k+shift)];
+        }
+      ExtLowesBuffer[i]=dmin;
+      ExtHighesBuffer[i]=dmax;
+     }
+//--- %K line
+   pos=InpKPeriod-1+InpSlowing-1;
+   for(i=0; i<pos; i++)
+      ExtMainBuffer[i]=0.0;
+
+//--- main cycle
+   for(i=0; i<InpKPeriod; i++)
+     {
+      double sumlow=0.0;
+      double sumhigh=0.0;
+      for(k=i; k<(i+InpSlowing); k++)
+        {
+         sumlow +=(testermetadata->close[tcurbar-(k+shift)]-ExtLowesBuffer[k]);
+         sumhigh+=(ExtHighesBuffer[k]-ExtLowesBuffer[k]);
+        }
+      if(sumhigh==0.0)
+         ExtMainBuffer[i]=100.0;
+      else
+         ExtMainBuffer[i]=sumlow/sumhigh*100.0;
+     }
+//--- signal
+   result.K = ExtMainBuffer[0];
+ 
+   double sum=0.0;
+   for(k=0; k<InpDPeriod; k++)
+    sum+=ExtMainBuffer[k];
+
+   result.D = sum/InpDPeriod;
+	
 }
 int iLowest(int count, int start){
 	double Low=99999999;int cLow=0;
@@ -308,7 +386,7 @@ int iHighest(int count, int start){
 	}
 	return(cHigh);
 }
-void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int period_ma_fast2, int period_ma_slow2, int cci_period2,int tpsell,int slsell,int slbuy,int tpbuy, tresults &result){
+void testerstart(int tf, double point, int ctimeout, int period_env, int period_env_k, int period_stoch_k, int period_env2, int period_env_k2, int period_stoch_k2,int tpsell,int slsell,int slbuy,int tpbuy, tresults &result){
 	double orderopenpricebuy,orderopenpricesell;
 	int orderopenedsell=0,orderopenedbuy=0;
 	int orderopentimebuy,orderopentimesell;
@@ -324,12 +402,23 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 				totalloss+=slsell;
 				totalnotprofitorders++;
 				totaltimeout+=i-orderopentimesell;
+
+/* printf(gmtimeToStr(testermetadata->ctm[orderopentimesell]));printf(" : ");
+printf(gmtimeToStr(testermetadata->ctm[i]));printf(" : ");
+printf("\r\n"); */
+		
+				
 			}
 			if( testermetadata->low[i] <= (orderopenpricesell-point*tpsell) ){
 				orderopenedsell=0;
 				totalprofit+=tpsell;
 				totalprofitorders++;
 				totaltimeout+=i-orderopentimesell;
+
+/* printf(gmtimeToStr(testermetadata->ctm[orderopentimesell]));printf(" : ");
+printf(gmtimeToStr(testermetadata->ctm[i]));printf(" : ");
+printf("\r\n");		 */		
+				
 			}
 		}
 		if(orderopenedbuy==1){
@@ -338,6 +427,7 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 				totalprofit+=tpbuy;
 				totalprofitorders++;
 				totaltimeout+=i-orderopentimebuy;
+				
 			}
 			if( testermetadata->low[i] <= (orderopenpricebuy-point*slbuy) ){
 				orderopenedbuy=0;
@@ -346,11 +436,32 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 				totaltimeout+=i-orderopentimebuy;
 			}
 		}		
-		
-		int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-		int signal2 = DeltaMasLength(period_ma_fast2, period_ma_slow2, cci_period2,tcurbar);
-		if(period_ma_fast2>0)
-		if(abs(signal2)>19){
+
+	eresults eresult0;
+	eresults& eresult = eresult0;
+	sresults sresult0;
+	sresults& sresult = sresult0;
+	sresults sresult01;
+	sresults& sresult1 = sresult01;
+	
+		int signal = 0;//DeltaMasLength(period_env, period_env_k, period_stoch_k,tcurbar);
+		int signal2 = 0;//DeltaMasLength(period_env2, period_env_k2, period_stoch_k2,tcurbar);
+
+		envelopes(period_env, period_env_k, 0,tcurbar, eresult);
+		stochastic(period_stoch_k,5, 0,tcurbar, sresult);
+		stochastic(period_stoch_k,5, 1,tcurbar, sresult1);
+		if((testermetadata->close[tcurbar]<eresult.down) && (sresult.K<19) && (sresult.D<19) && (sresult1.K<19) && (sresult1.D<19) && (sresult.K>sresult.D) && (sresult1.K<sresult1.D))
+		signal=1;
+
+	
+	
+		envelopes(period_env2, period_env_k2, 0,tcurbar, eresult);
+		stochastic(period_stoch_k2,5, 0,tcurbar, sresult);
+		stochastic(period_stoch_k2,5, 1,tcurbar, sresult1);
+		if((testermetadata->close[tcurbar]>eresult.up) && (sresult.K>81) && (sresult.D>81) && (sresult1.K>81) && (sresult1.D>81) && (sresult.K<sresult.D) && (sresult1.K>sresult1.D))
+		signal2=1;	
+	
+		if(period_env2>0){
 			//if((signal>0)&&(orderopenedsell==0)&&(iLowest(19,tcurbar)>10)&&(iHighest(19,tcurbar)<5)) {
 			if((signal2>0)&&(orderopenedsell==0)){
 				orderopenedsell=1;//OP_SELL;
@@ -359,10 +470,9 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 				//break;
 			}
 		}
-		if(period_ma_fast>0)
-		if(abs(signal)>19){
+		if(period_env>0){
 			//if((signal<0)&&(orderopenedbuy==0)&&(iLowest(19,tcurbar)<5)&&(iHighest(19,tcurbar)>10)) {
-			if((signal<0)&&(orderopenedbuy==0)){
+			if((signal>0)&&(orderopenedbuy==0)){
 				orderopenedbuy=1;//OP_BUY;
 				orderopentimebuy=i;
 				orderopenpricebuy=testermetadata->open[i];
@@ -419,6 +529,7 @@ const char* testertest(const char* ctf,int ma1,int ma2,int cci1,int ma1_2,int ma
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
  
+
  	
 	tresults& testerresult = testerresult1;
 
@@ -436,7 +547,6 @@ const char* testertest(const char* ctf,int ma1,int ma2,int cci1,int ma1_2,int ma
 }
 const char* sniper(const char* symbol,int ma1,int ma2,int cci1,int ma1_2,int ma2_2,int cci1_2,const char* tf, const char* timeout,int tpsell,int slsell,int slbuy,int tpbuy) {
 	double point = loadHST(symbol,tf);
-
 	return (const char *)testertest(tf,ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,point,timeout,tpsell,slsell,slbuy,tpbuy);
 }
 void ReadConfig(){
@@ -599,6 +709,7 @@ char* SaveResults(){
 			Ttotalnotprofitorders[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],4) );
 			Tmidtimeout[tf]+= strToInt( GetElement(&snipertxt[tf][i2+1][0],5) );
 		   i4++;
+
 		   if(strToInt(&snipertxt[tf][0][0])>0)if(maxtf<(double)i3)maxtf=(double)i3;
 		  }
 		}
@@ -653,7 +764,7 @@ char* SaveResults(){
 
 
 
-   FILE* fd;
+/*    FILE* fd;
    char *src_str;src_str = (char *)malloc(40000);memset(src_str,0,40000);
    fd = fopen(pathCONFIG, "rb");
    int src_size = fread(src_str, 40000,1,fd);
@@ -690,7 +801,7 @@ char* SaveResults(){
    WSACleanup();
    
    free(buff);
-   free(src_str);	
+   free(src_str);	 */
 	
 	
 
@@ -717,7 +828,8 @@ int main(int argc, char *argv[]){
 	
 	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
 	timeshift = strToInt(argv[4]);bars = strToInt(argv[1]);
-	if(timeshift==0){timeshift=400; bars-=400;}
+	if(timeshift==0){timeshift=12400; //bars-=12400;
+	}
 	mulsl = strtod(argv[5], NULL);
 	multp = strtod(argv[6], NULL);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
@@ -733,7 +845,7 @@ int main(int argc, char *argv[]){
 	
 	for(int i1=0;i1<cindex;i1++){
 		for(int i2=0;i2<strToInt(&config[i1][0][0]);i2++)
-		if(strToInt(GetElement(&config[i1][i2+2][0],1))>0){
+		if((strToInt(GetElement(&config[i1][i2+2][0],1))>0) || (strToInt(GetElement(&config[i1][i2+2][0],12))>0)){
 			memset(tf,0,15);memset(timeout,0,30);memset(optresult,0,100);
 			tpbuy=strToInt(GetElement(&config[i1][i2+2][0],11));tpbuy*=multp;if(tpbuy<1)tpbuy=1;
 			tpsell=strToInt(GetElement(&config[i1][i2+2][0],4));tpsell*=multp;if(tpsell<1)tpsell=1;
@@ -748,6 +860,8 @@ int main(int argc, char *argv[]){
 			ma2_2=strToInt(GetElement(&config[i1][i2+2][0],13));
 			cci1_2=strToInt(GetElement(&config[i1][i2+2][0],14));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
+			
+			
 			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,tf,timeout,tpsell,slsell,slbuy,tpbuy));
 			
 			if(strlen(optresult)>0){printf(tf);printf(" ");printf(&config[i1][1][0]);printf(" ");printf(optresult);printf("\r\n");}
