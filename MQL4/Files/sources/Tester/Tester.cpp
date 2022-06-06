@@ -733,7 +733,7 @@ int main(int argc, char *argv[]){
 	
 	for(int i1=0;i1<cindex;i1++){
 		for(int i2=0;i2<strToInt(&config[i1][0][0]);i2++)
-		if(strToInt(GetElement(&config[i1][i2+2][0],1))>0){
+		if((strToInt(GetElement(&config[i1][i2+2][0],1))>0) || (strToInt(GetElement(&config[i1][i2+2][0],12))>0)){
 			memset(tf,0,15);memset(timeout,0,30);memset(optresult,0,100);
 			tpbuy=strToInt(GetElement(&config[i1][i2+2][0],11));tpbuy*=multp;if(tpbuy<1)tpbuy=1;
 			tpsell=strToInt(GetElement(&config[i1][i2+2][0],4));tpsell*=multp;if(tpsell<1)tpsell=1;

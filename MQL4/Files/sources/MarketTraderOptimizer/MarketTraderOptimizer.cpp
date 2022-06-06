@@ -303,7 +303,7 @@ int tsocketscpucnt ()
 double sma(const int period, const int price, const int shift,int tcurbar){
 	double sum=0.0,tmp;
 	if(price==PRICE_CLOSE){
-		for(int i=0;i<period;i+=2)
+		for(int i=0;i<period;i++)
 		{
 			sum+=testermetadata->close[tcurbar-(i+shift)];
 		}
@@ -311,7 +311,7 @@ double sma(const int period, const int price, const int shift,int tcurbar){
 		return(tmp);
 	}else
 	if(price==PRICE_MEDIAN){
-		for(int i=0;i<period;i+=2)
+		for(int i=0;i<period;i++)
 		{
             tmp=testermetadata->high[tcurbar-(i+shift)];
             tmp+=testermetadata->low[tcurbar-(i+shift)];
@@ -322,7 +322,7 @@ double sma(const int period, const int price, const int shift,int tcurbar){
 		return(tmp);
 	}else
 	if(price==PRICE_TYPICAL){
-		for(int i=0;i<period;i+=2)
+		for(int i=0;i<period;i++)
 		{
 			tmp=testermetadata->high[tcurbar-(i+shift)];
 			tmp+=testermetadata->low[tcurbar-(i+shift)];
@@ -341,12 +341,12 @@ double cci(const int period, const int shift, int tcurbar ){
 	mul = 0.015/period;
 	sum = 0.0;
 	k = period-1;
-	k = ((int)(k/2))*2;
+	//k = ((int)(k/2))*2;
 	while(k>=0)
 	{
 		price=(testermetadata->high[tcurbar-(k+shift)]+testermetadata->low[tcurbar-(k+shift)]+testermetadata->close[tcurbar-(k+shift)])/3.0;
 		sum+=fabs(price-MovBuffer);
-		k-=2;
+		k--;
 	}
 	DevBuffer = sum*mul;
 	price =(testermetadata->high[tcurbar-(shift)]+testermetadata->low[tcurbar-(shift)]+testermetadata->close[tcurbar-(shift)])/3.0;
@@ -577,6 +577,7 @@ void testerstartb(int tf, double point, int ctimeout, int period_ma_fast, int pe
 	}
 	else profitcntordersbuy=0;
 	if((slb<extremums->midprofit)||(profitcntpointsbuy<extremums->midprofit)){result.profitcntorders=0;return;}
+	if(profitcntpointsbuy<slb*2)notprofitcntorders=9999;
 	
 	result.profitcntpointsbuy=profitcntpointsbuy;
 	//result.profitcntpointssell=profitcntpointssell;
@@ -629,6 +630,7 @@ void testerstarts(int tf, double point, int ctimeout, int period_ma_fast, int pe
 	}
 	else profitcntpointssell=0;
 	if((sls<extremums->midprofit)||(profitcntpointssell<extremums->midprofit)){result.profitcntorderssell=0;return;}
+	if(profitcntpointssell<sls*2)notprofitcntorderssell=9999;
 	
 	//result.profitcntpointsbuy=profitcntpointsbuy;
 	result.profitcntpointssell=profitcntpointssell;
