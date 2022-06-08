@@ -35,7 +35,7 @@ int tfdepth=5;
 char* pathCONFIG;
 char* pathHST;
 
-int randcycles=25;
+int randcycles=75;
 
 struct mdata{
 	long int ctm[50000];
