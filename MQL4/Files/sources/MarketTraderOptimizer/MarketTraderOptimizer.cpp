@@ -470,76 +470,7 @@ int DeltaMasLength(int period_ma_fast, int period_ma_slow, int cci_period,int tc
 	}
 	return 0;	
 }
-void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
-	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
-	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0;
-	int tprofitcntpointsbuy=9999999,tprofitcntpointssell=9999999;
-	int profitcntordersbuy=0, profitcntorderssell=0;
-	double openorderprice;
-	int tcurbar;
-	int slb=0,sls=0,w1,w2;
-	for(int i2=0;i2<extremums->barscnt;i2++){
-		w1 = extremums->low[i2];if(w1>(bars-1))w1=(bars-1);
-		w2 = extremums->high[i2];if(w2>(bars-1))w2=(bars-1);
-		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorderb = (int)((testermetadata->high[w2]-openorderprice)/point);
-			int profitorders = (int)((testermetadata->low[w1]-openorderprice)/point);
-			if((profitorderb>0)&&(openorder==OP_BUY)){
-				profitcntordersbuy++;
-				profitcntpointsbuy=(int)((testermetadata->high[w2]-openorderprice)/point);
-				slb = profitcntpointsbuy /4;
-			}
-			if((profitorders<0)&&(openorder==OP_SELL)){
-				profitcntorderssell++;
-				profitcntpointssell=(int)((openorderprice-testermetadata->low[w1])/point);
-				sls = profitcntpointssell /4 ;		
-			}
-			if( ((profitorderb<0)&&(openorder==OP_BUY)) || ((profitorders>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-			openorderclosed=1;
-		}
-		
-		for(int y=0;y<6;y++)
-		if(openorderclosed==1){
-			if(((openorder==0)||(openorder==-1))&&(w2>0)){
-				tcurbar=w2+y;
-				int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-				if((abs(signal)>9) && (signal>0)){
-				//if(signal>0){
-					openorder=OP_SELL;
-					openorderclosed=0;
-					openorderprice=testermetadata->open[tcurbar];
-					//profitcntpointssell=0;
-				}
-			}else
-			if(((openorder==1)||(openorder==-1))&&(w1>0) ){
-				tcurbar=w1+y;
-				int signal = DeltaMasLength(period_ma_fast, period_ma_slow, cci_period,tcurbar);
-				if((abs(signal)>9) && (signal<0)){
-				//if(signal<0){
-					openorder=OP_BUY;
-					openorderclosed=0;
-					openorderprice=testermetadata->open[tcurbar];
-					//profitcntpointsbuy=0;
-				}
-			}		
-		}
-	}
-	
-	result.profitcntpointsbuy=profitcntpointsbuy;
-	result.profitcntpointssell=profitcntpointssell;
-	result.period_ma_fast=period_ma_fast;
-	result.period_ma_slow=period_ma_slow;
-	result.cci_period=cci_period;
-	result.profitcntorders=profitcntordersbuy+profitcntorderssell;
-	result.profitcntordersbuy=profitcntordersbuy;
-	result.profitcntorderssell=profitcntorderssell;
-	result.notprofitcntorders=notprofitcntorders;
-	result.stoplossbuy=slb;
-	result.stoplosssell=sls;
-	
-	return;
-}
-void testerstartb(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
+void testerstartb(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int spr, tresults &result){
 	int openorder=-1,openorderclosed=1,timeout=16;//(int)(ctimeout/tf/60/2);
 	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0;
 	int profitcntordersbuy=0, profitcntorderssell=0;
@@ -548,7 +479,7 @@ void testerstartb(int tf, double point, int ctimeout, int period_ma_fast, int pe
 	int slb=0,sls=0;
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorderb = (int)((testermetadata->high[i]-openorderprice)/point)-testermetadata->spread[bars-2];
+			int profitorderb = (int)((testermetadata->high[i]-openorderprice)/point)-spr;
 			if((profitorderb>0)&&(openorder==OP_BUY)){
 				profitcntordersbuy++;
 				profitcntpointsbuy+=(testermetadata->high[iHighest(timeout,i)]-openorderprice)/point;
@@ -593,7 +524,7 @@ void testerstartb(int tf, double point, int ctimeout, int period_ma_fast, int pe
 	
 	return;
 }
-void testerstarts(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, tresults &result){
+void testerstarts(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int spr, tresults &result){
 	int openorder=-1,openorderclosed=1,timeout=16;//(int)(ctimeout/tf/60/2);
 	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0,notprofitcntorderssell=0;
 	int profitcntordersbuy=0, profitcntorderssell=0;
@@ -602,8 +533,8 @@ void testerstarts(int tf, double point, int ctimeout, int period_ma_fast, int pe
 	int slb=0,sls=0;
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorders = (int)((testermetadata->low[i]-openorderprice)/point)-testermetadata->spread[bars-2];
-			if((profitorders<0)&&(openorder==OP_SELL)){
+			int profitorders = (int)((openorderprice-testermetadata->low[i])/point)-spr;
+			if((profitorders>0)&&(openorder==OP_SELL)){
 				profitcntorderssell++;
 				profitcntpointssell+=abs((testermetadata->low[iLowest(timeout,i)]-openorderprice)/point);
 				sls+=abs((testermetadata->high[iHighest(timeout,i)]-openorderprice)/point);
@@ -654,59 +585,14 @@ struct tthread{
 	int tf;
 	int timeout;
 	double point;
+	int spr;
 	int randcycles;
 	bool done;
 	tresults results;
 	tresults tmpresults;
 };
 int treadcount;
-DWORD WINAPI myThread0(LPVOID lpParameter){
-	tthread& thread = *((tthread*)lpParameter);
-	
-	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_ma_fast=0,period_ma_slow=0,cci_period=0;
-	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntordersbuy=0,profitcntorderssell=0;
-	int sls=0,slb=0;
-	tresults& testerresult = thread.tmpresults;
-	
-	int tf=thread.tf;int timeout=thread.timeout;
-	for(int i=0;i<thread.randcycles;i++){
-		int t1=2,t2=1, t3=0;
-		while(t1>=t2){t1=rand(12,55,thread.id);t2=rand(77,222,thread.id);t3=rand(55,222,thread.id);}
-		testerstartb(tf,thread.point,timeout,t1,t2,t3,testerresult);
-		//if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
-		//if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
-		if(testerresult.profitcntorders>1);
-		if((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)){
-			profitcntpointsbuy = testerresult.profitcntpointsbuy;
-			profitcntpointssell = testerresult.profitcntpointssell;
-			period_ma_fast = testerresult.period_ma_fast;
-			period_ma_slow = testerresult.period_ma_slow;
-			cci_period = testerresult.cci_period;
-			profitcntorders = testerresult.profitcntorders;
-			profitcntordersbuy = testerresult.profitcntordersbuy;
-			profitcntorderssell = testerresult.profitcntorderssell;
-			notprofitcntorders = testerresult.notprofitcntorders;
-			sls = testerresult.stoplosssell;
-			slb = testerresult.stoplossbuy;
-			
-		}
-	}
-	thread.results.profitcntpointsbuy = profitcntpointsbuy;
-	thread.results.profitcntpointssell = profitcntpointssell;
-	thread.results.period_ma_fast = period_ma_fast;
-	thread.results.period_ma_slow = period_ma_slow;
-	thread.results.cci_period = cci_period;
-	thread.results.profitcntorders = profitcntorders;
-	thread.results.profitcntordersbuy = profitcntordersbuy;
-	thread.results.profitcntorderssell = profitcntorderssell;
-	thread.results.notprofitcntorders = notprofitcntorders;
-	thread.results.stoplossbuy = slb;
-	thread.results.stoplosssell = sls;
-	thread.done = true;
-	
-	
-	return 0;
-}
+
 DWORD WINAPI myThread(LPVOID lpParameter){
 	tthread& thread = *((tthread*)lpParameter);
 	
@@ -719,7 +605,7 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	for(int i=0;i<thread.randcycles;i++){
 		int t1=2,t2=1, t3=0;
 		while(t1>=t2){t1=rand(12,55,thread.id);t2=rand(77,222,thread.id);t3=rand(55,222,thread.id);}
-		testerstartb(tf,thread.point,timeout,t1,t2,t3,testerresult);
+		testerstartb(tf,thread.point,timeout,t1,t2,t3,thread.spr,testerresult);
 		//if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
 		//if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
 		if(testerresult.profitcntorders>0)
@@ -743,7 +629,7 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	for(int i=0;i<thread.randcycles;i++){
 		int t1=2,t2=1, t3=0;
 		while(t1>=t2){t1=rand(12,55,thread.id);t2=rand(77,222,thread.id);t3=rand(55,222,thread.id);}
-		testerstarts(tf,thread.point,timeout,t1,t2,t3,testerresult);
+		testerstarts(tf,thread.point,timeout,t1,t2,t3,thread.spr,testerresult);
 		//if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
 		//if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
 		if(testerresult.profitcntorderssell>0)
@@ -800,6 +686,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout,int sp
 		threads[i].tf = tf;
 		threads[i].timeout = timeout;
 		threads[i].point = point;
+		threads[i].spr = spr;		
 		threads[i].randcycles = randcycles;
 		threads[i].handleclosed = false;
 		threads[i].handle=CreateThread(0, 0, myThread, &threads[i], 0, &threads[i].threadid);
@@ -1374,7 +1261,7 @@ int main(int argc, char *argv[]){
 		fread(str1,dwFileSize,1,hFile);
 		fclose(hFile);
 	}
-	str1 = SetElement(str1,1,intToStr(time1(NULL)+60*60*10));
+	str1 = SetElement(str1,1,intToStr(time1(NULL)+60*60*72));
 	hFile = fopen(path, "wb");
 	if(!(!hFile)){
 		fseek(hFile,0,SEEK_SET);

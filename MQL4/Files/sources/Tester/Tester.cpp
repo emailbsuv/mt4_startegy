@@ -308,7 +308,7 @@ int iHighest(int count, int start){
 	}
 	return(cHigh);
 }
-void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int period_ma_fast2, int period_ma_slow2, int cci_period2,int tpsell,int slsell,int slbuy,int tpbuy, tresults &result){
+void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int period_ma_slow, int cci_period, int period_ma_fast2, int period_ma_slow2, int cci_period2,int tpsell,int slsell,int slbuy,int tpbuy, int sprd, tresults &result){
 	double orderopenpricebuy,orderopenpricesell;
 	int orderopenedsell=0,orderopenedbuy=0;
 	int orderopentimebuy,orderopentimesell;
@@ -319,13 +319,13 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 		tcurbar=i;
 		
 		if(orderopenedsell==1){
-			if( testermetadata->high[i] >= (orderopenpricesell+point*slsell) ){
+			if( testermetadata->high[i] >= (orderopenpricesell+point*slsell+point*sprd) ){
 				orderopenedsell=0;
 				totalloss+=slsell;
 				totalnotprofitorders++;
 				totaltimeout+=i-orderopentimesell;
 			}
-			if( testermetadata->low[i] <= (orderopenpricesell-point*tpsell) ){
+			if( testermetadata->low[i] <= (orderopenpricesell-point*tpsell-point*sprd) ){
 				orderopenedsell=0;
 				totalprofit+=tpsell;
 				totalprofitorders++;
@@ -333,13 +333,13 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 			}
 		}
 		if(orderopenedbuy==1){
-			if( testermetadata->high[i] >= (orderopenpricebuy+point*tpbuy) ){
+			if( testermetadata->high[i] >= (orderopenpricebuy+point*tpbuy+point*sprd) ){
 				orderopenedbuy=0;
 				totalprofit+=tpbuy;
 				totalprofitorders++;
 				totaltimeout+=i-orderopentimebuy;
 			}
-			if( testermetadata->low[i] <= (orderopenpricebuy-point*slbuy) ){
+			if( testermetadata->low[i] <= (orderopenpricebuy-point*slbuy-point*sprd) ){
 				orderopenedbuy=0;
 				totalloss+=slbuy;
 				totalnotprofitorders++;
@@ -414,7 +414,7 @@ void testerstart(int tf, double point, int ctimeout, int period_ma_fast, int per
 	return ;
 }
 tresults testerresult1;
-const char* testertest(const char* ctf,int ma1,int ma2,int cci1,int ma1_2,int ma2_2,int cci1_2,double point, const char* ctimeout,int tpsell,int slsell,int slbuy,int tpbuy) {
+const char* testertest(const char* ctf,int ma1,int ma2,int cci1,int ma1_2,int ma2_2,int cci1_2,double point, const char* ctimeout,int tpsell,int slsell,int slbuy,int tpbuy,int sprd) {
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
 	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
@@ -422,7 +422,7 @@ const char* testertest(const char* ctf,int ma1,int ma2,int cci1,int ma1_2,int ma
  	
 	tresults& testerresult = testerresult1;
 
-	testerstart(tf,point,timeout,ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,tpsell,slsell,slbuy,tpbuy,testerresult);
+	testerstart(tf,point,timeout,ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,tpsell,slsell,slbuy,tpbuy,sprd,testerresult);
 	
 	lstrcat(itemconfig,intToStr(testerresult1.totalloss));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(testerresult1.totalprofit));lstrcat(itemconfig," ");
@@ -434,10 +434,10 @@ const char* testertest(const char* ctf,int ma1,int ma2,int cci1,int ma1_2,int ma
 	
 	return (const char *)itemconfig;
 }
-const char* sniper(const char* symbol,int ma1,int ma2,int cci1,int ma1_2,int ma2_2,int cci1_2,const char* tf, const char* timeout,int tpsell,int slsell,int slbuy,int tpbuy) {
+const char* sniper(const char* symbol,int ma1,int ma2,int cci1,int ma1_2,int ma2_2,int cci1_2,const char* tf, const char* timeout,int tpsell,int slsell,int slbuy,int tpbuy,int sprd) {
 	double point = loadHST(symbol,tf);
 
-	return (const char *)testertest(tf,ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,point,timeout,tpsell,slsell,slbuy,tpbuy);
+	return (const char *)testertest(tf,ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,point,timeout,tpsell,slsell,slbuy,tpbuy,sprd);
 }
 void ReadConfig(){
 	
@@ -670,7 +670,7 @@ char* SaveResults(){
    int bufflen = 16+strlen(membuf)+strlen(src_str);
    //printf(&buff[16]);return 0;
    
-   WSADATA ws;
+/*    WSADATA ws;
    WSAStartup (MAKEWORD( 1, 1 ), &ws);
 
    SOCKET s;
@@ -687,7 +687,7 @@ char* SaveResults(){
    send (s, buff, bufflen, 0 );
    
    closesocket (s);
-   WSACleanup();
+   WSACleanup(); */
    
    free(buff);
    free(src_str);	
@@ -717,13 +717,13 @@ int main(int argc, char *argv[]){
 	
 	pathHST = new char[500];memset(pathHST,0,500);lstrcat(pathHST,"..\\..\\history\\");lstrcat(pathHST,argv[7]);lstrcat(pathHST,"\\");
 	timeshift = strToInt(argv[4]);bars = strToInt(argv[1]);
-	if(timeshift==0){timeshift=400; bars-=400;}
+	if(timeshift==0){timeshift=1200; /*bars-=400;*/}
 	mulsl = strtod(argv[5], NULL);
 	multp = strtod(argv[6], NULL);
 	char *stm1;stm1 = (char *)malloc(100000);memset(stm1,0,100000);
 	char tf[15];memset(tf,0,15);char timeout[30];memset(timeout,0,30);
 	int tpbuy,tpsell,slsell,slbuy;
-	int ma1,ma2,cci1,ma1_2,ma2_2,cci1_2;
+	int ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,sprd;
 	char optresult[100];memset(optresult,0,100);
 	
 	testermetadata = new mdata[1];
@@ -744,11 +744,12 @@ int main(int argc, char *argv[]){
 			ma1=strToInt(GetElement(&config[i1][i2+2][0],1));
 			ma2=strToInt(GetElement(&config[i1][i2+2][0],2));
 			cci1=strToInt(GetElement(&config[i1][i2+2][0],3));
+			sprd=strToInt(GetElement(&config[i1][i2+2][0],6));
 			ma1_2=strToInt(GetElement(&config[i1][i2+2][0],12));
 			ma2_2=strToInt(GetElement(&config[i1][i2+2][0],13));
 			cci1_2=strToInt(GetElement(&config[i1][i2+2][0],14));
 			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
-			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,tf,timeout,tpsell,slsell,slbuy,tpbuy));
+			lstrcat(optresult,sniper(&config[i1][1][0],ma1,ma2,cci1,ma1_2,ma2_2,cci1_2,tf,timeout,tpsell,slsell,slbuy,tpbuy,sprd));
 			
 			if(strlen(optresult)>0){printf(tf);printf(" ");printf(&config[i1][1][0]);printf(" ");printf(optresult);printf("\r\n");}
 			PatchConfig(strToInt(tf),&config[i1][1][0],optresult);
