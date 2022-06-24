@@ -47,8 +47,8 @@ struct mdata{
 	int spread[50000];
 };
 struct mextremums{
-	int low[5000];
-	int high[5000];
+	int low[50000];
+	int high[50000];
 	int barscnt;
 	int midprofit;
 };
@@ -558,77 +558,9 @@ void stochastic(const int InpKPeriod,const int InpDPeriod, const int shift,int t
    result.D1 = sum/InpDPeriod;
    
 }
-void testerstart(int tf, double point, int ctimeout, int period_env, int period_env_k, int period_stoch_k, tresults &result){
-	int openorder=-1,openorderclosed=1,timeout=(int)(ctimeout/tf/60/2);
-	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0;
-	int tprofitcntpointsbuy=9999999,tprofitcntpointssell=9999999;
-	int profitcntordersbuy=0, profitcntorderssell=0;
-	double openorderprice;
-	int tcurbar;
-	int slb=0,sls=0,w1,w2;
-	for(int i2=0;i2<extremums->barscnt;i2++){
-		w1 = extremums->low[i2];if(w1>(bars-1))w1=(bars-1);
-		w2 = extremums->high[i2];if(w2>(bars-1))w2=(bars-1);
-		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorderb = (int)((testermetadata->high[w2]-openorderprice)/point);
-			int profitorders = (int)((testermetadata->low[w1]-openorderprice)/point);
-			if((profitorderb>0)&&(openorder==OP_BUY)){
-				profitcntordersbuy++;
-				profitcntpointsbuy=(int)((testermetadata->high[w2]-openorderprice)/point);
-				slb = profitcntpointsbuy /4;
-			}
-			if((profitorders<0)&&(openorder==OP_SELL)){
-				profitcntorderssell++;
-				profitcntpointssell=(int)((openorderprice-testermetadata->low[w1])/point);
-				sls = profitcntpointssell /4 ;		
-			}
-			if( ((profitorderb<0)&&(openorder==OP_BUY)) || ((profitorders>0)&&(openorder==OP_SELL)) )notprofitcntorders++;
-			openorderclosed=1;
-		}
-		
-		for(int y=0;y<6;y++)
-		if(openorderclosed==1){
-			if(((openorder==0)||(openorder==-1))&&(w2>0)){
-				tcurbar=w2+y;
-				int signal = DeltaMasLength(period_env, period_env_k, period_stoch_k,tcurbar);
-				if((abs(signal)>9) && (signal>0)){
-				//if(signal>0){
-					openorder=OP_SELL;
-					openorderclosed=0;
-					openorderprice=testermetadata->open[tcurbar];
-					//profitcntpointssell=0;
-				}
-			}else
-			if(((openorder==1)||(openorder==-1))&&(w1>0) ){
-				tcurbar=w1+y;
-				int signal = DeltaMasLength(period_env, period_env_k, period_stoch_k,tcurbar);
-				if((abs(signal)>9) && (signal<0)){
-				//if(signal<0){
-					openorder=OP_BUY;
-					openorderclosed=0;
-					openorderprice=testermetadata->open[tcurbar];
-					//profitcntpointsbuy=0;
-				}
-			}		
-		}
-	}
-	
-	result.profitcntpointsbuy=profitcntpointsbuy;
-	result.profitcntpointssell=profitcntpointssell;
-	result.period_env=period_env;
-	result.period_env_k=period_env_k;
-	result.period_stoch_k=period_stoch_k;
-	result.profitcntorders=profitcntordersbuy+profitcntorderssell;
-	result.profitcntordersbuy=profitcntordersbuy;
-	result.profitcntorderssell=profitcntorderssell;
-	result.notprofitcntorders=notprofitcntorders;
-	result.stoplossbuy=slb;
-	result.stoplosssell=sls;
-	
-	return;
-}
-void testerstartb(int tf, double point, int ctimeout, int period_env, int period_env_k, int period_stoch_k, tresults &result){
-	int openorder=-1,openorderclosed=1,timeout=16;//(int)(ctimeout/tf/60/2);
+
+void testerstartb(int tf, double point, int spr, int period_env, int period_env_k, int period_stoch_k, tresults &result){
+	int openorder=-1,openorderclosed=1,timeout=48;//(int)(ctimeout/tf/60/2);
 	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorders=0;
 	int profitcntordersbuy=0, profitcntorderssell=0;
 	double openorderprice;
@@ -642,13 +574,13 @@ void testerstartb(int tf, double point, int ctimeout, int period_env, int period
 	
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorderb = (int)((testermetadata->high[i]-openorderprice)/point)-testermetadata->spread[bars-2];
+			int profitorderb = (int)((testermetadata->high[i]-openorderprice)/point);
 			if((profitorderb>0)&&(openorder==OP_BUY)){
 				profitcntordersbuy++;
 				profitcntpointsbuy+=(testermetadata->high[iHighest(timeout,i)]-openorderprice)/point;
 				slb+=abs((testermetadata->low[iLowest(timeout,i)]-openorderprice)/point);
 			}
-			else {notprofitcntorders++;}//notprofitcntorders=99999;goto FFF1;}//
+			else {notprofitcntorders=99999;goto FFF1;}//notprofitcntorders++;}//
 			openorderclosed=1;
 		}
 		
@@ -661,7 +593,7 @@ void testerstartb(int tf, double point, int ctimeout, int period_env, int period
 				if((testermetadata->close[tcurbar]<eresult.down) && (sresult.K<19) && (sresult.D<19) && (sresult.K1<19) && (sresult.D1<19) && (sresult.K>sresult.D) && (sresult.K1<sresult.D1)){
 					openorder=OP_BUY;
 					openorderclosed=0;
-					openorderprice=testermetadata->open[tcurbar];
+					openorderprice=testermetadata->open[tcurbar]-point*spr;
 					i+=timeout;
 				}
 			}		
@@ -673,7 +605,8 @@ void testerstartb(int tf, double point, int ctimeout, int period_env, int period
 	}
 	else profitcntordersbuy=0;
 	if((slb<extremums->midprofit)||(profitcntpointsbuy<extremums->midprofit)){result.profitcntorders=0;return;}
-	if(profitcntpointsbuy<slb*2)notprofitcntorders=9999;
+	if(profitcntpointsbuy<slb*3)notprofitcntorders=9999;
+	if(profitcntordersbuy<4)notprofitcntorders=9999;
 	
 	FFF1:
 	result.profitcntpointsbuy=profitcntpointsbuy;
@@ -690,8 +623,8 @@ void testerstartb(int tf, double point, int ctimeout, int period_env, int period
 	
 	return;
 }
-void testerstarts(int tf, double point, int ctimeout, int period_env, int period_env_k, int period_stoch_k, tresults &result){
-	int openorder=-1,openorderclosed=1,timeout=16;//(int)(ctimeout/tf/60/2);
+void testerstarts(int tf, double point, int spr, int period_env, int period_env_k, int period_stoch_k, tresults &result){
+	int openorder=-1,openorderclosed=1,timeout=48;//(int)(ctimeout/tf/60/2);
 	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntorders=0,notprofitcntorderssell=0;
 	int profitcntordersbuy=0, profitcntorderssell=0;
 	double openorderprice;
@@ -711,7 +644,7 @@ void testerstarts(int tf, double point, int ctimeout, int period_env, int period
 				profitcntorderssell++;
 				profitcntpointssell+=abs((testermetadata->low[iLowest(timeout,i)]-openorderprice)/point);
 				sls+=abs((testermetadata->high[iHighest(timeout,i)]-openorderprice)/point);
-			}else {notprofitcntorderssell++;}//notprofitcntorderssell=99999;goto FFF2;}//
+			}else {notprofitcntorderssell=99999;goto FFF2;}//notprofitcntorderssell++;}//
 			openorderclosed=1;
 		}
 		
@@ -724,7 +657,7 @@ void testerstarts(int tf, double point, int ctimeout, int period_env, int period
 				if((testermetadata->close[tcurbar]>eresult.up) && (sresult.K>81) && (sresult.D>81) && (sresult.K1>81) && (sresult.D1>81) && (sresult.K<sresult.D) && (sresult.K1>sresult.D1)){
 					openorder=OP_SELL;
 					openorderclosed=0;
-					openorderprice=testermetadata->open[tcurbar];
+					openorderprice=testermetadata->open[tcurbar]+point*spr;
 					i+=timeout;
 				}
 			}
@@ -736,7 +669,8 @@ void testerstarts(int tf, double point, int ctimeout, int period_env, int period
 	}
 	else profitcntpointssell=0;
 	if((sls<extremums->midprofit)||(profitcntpointssell<extremums->midprofit)){result.profitcntorderssell=0;return;}
-	if(profitcntpointssell<sls*2)notprofitcntorderssell=9999;
+	if(profitcntpointssell<sls*3)notprofitcntorderssell=9999;
+	if(profitcntorderssell<4)notprofitcntorderssell=9999;
 	
 FFF2:	
 	//result.profitcntpointsbuy=profitcntpointsbuy;
@@ -761,59 +695,14 @@ struct tthread{
 	int tf;
 	int timeout;
 	double point;
+	int spr;
 	int randcycles;
 	bool done;
 	tresults results;
 	tresults tmpresults;
 };
 int treadcount;
-DWORD WINAPI myThread0(LPVOID lpParameter){
-	tthread& thread = *((tthread*)lpParameter);
-	
-	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_env=0,period_env_k=0,period_stoch_k=0;
-	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntordersbuy=0,profitcntorderssell=0;
-	int sls=0,slb=0;
-	tresults& testerresult = thread.tmpresults;
-	
-	int tf=thread.tf;int timeout=thread.timeout;
-	for(int i=0;i<thread.randcycles;i++){
-		int t1=2,t2=1, t3=0;
-		while(t1>=t2){t1=rand(44,88,thread.id);t2=rand(50,150,thread.id);t3=rand(44,88,thread.id);}
-		testerstartb(tf,thread.point,timeout,t1,t2,t3,testerresult);
-		//if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
-		//if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
-		if(testerresult.profitcntorders>1);
-		if((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)){
-			profitcntpointsbuy = testerresult.profitcntpointsbuy;
-			profitcntpointssell = testerresult.profitcntpointssell;
-			period_env = testerresult.period_env;
-			period_env_k = testerresult.period_env_k;
-			period_stoch_k = testerresult.period_stoch_k;
-			profitcntorders = testerresult.profitcntorders;
-			profitcntordersbuy = testerresult.profitcntordersbuy;
-			profitcntorderssell = testerresult.profitcntorderssell;
-			notprofitcntorders = testerresult.notprofitcntorders;
-			sls = testerresult.stoplosssell;
-			slb = testerresult.stoplossbuy;
-			
-		}
-	}
-	thread.results.profitcntpointsbuy = profitcntpointsbuy;
-	thread.results.profitcntpointssell = profitcntpointssell;
-	thread.results.period_env = period_env;
-	thread.results.period_env_k = period_env_k;
-	thread.results.period_stoch_k = period_stoch_k;
-	thread.results.profitcntorders = profitcntorders;
-	thread.results.profitcntordersbuy = profitcntordersbuy;
-	thread.results.profitcntorderssell = profitcntorderssell;
-	thread.results.notprofitcntorders = notprofitcntorders;
-	thread.results.stoplossbuy = slb;
-	thread.results.stoplosssell = sls;
-	thread.done = true;
-	
-	
-	return 0;
-}
+
 DWORD WINAPI myThread(LPVOID lpParameter){
 	tthread& thread = *((tthread*)lpParameter);
 	
@@ -826,24 +715,18 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	for(int i=0;i<thread.randcycles;i++){
 		int t1=2,t2=1, t3=0;
 		while(t1>=t2){t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
-		testerstartb(tf,thread.point,timeout,t1,t2,t3,testerresult);
-		//if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
-		//if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
-		//if(testerresult.profitcntorders>4)
+		testerstartb(tf,thread.point,thread.spr,t1,t2,t3,testerresult);
 		if(testerresult.profitcntorders>profitcntorders)
-		if((testerresult.notprofitcntorders*5)<testerresult.profitcntorders)
+		//if((testerresult.notprofitcntorders*8)<testerresult.profitcntorders)
+		if(testerresult.notprofitcntorders<1)
 		{
-		//if(testerresult.profitcntpointsbuy>profitcntpointsbuy){
 			profitcntpointsbuy = testerresult.profitcntpointsbuy;
-			//profitcntpointssell = testerresult.profitcntpointssell;
 			period_env = testerresult.period_env;
 			period_env_k = testerresult.period_env_k;
 			period_stoch_k = testerresult.period_stoch_k;
 			profitcntorders = testerresult.profitcntorders;
 			profitcntordersbuy = testerresult.profitcntordersbuy;
-			//profitcntorderssell = testerresult.profitcntorderssell;
 			notprofitcntorders = testerresult.notprofitcntorders;
-			//sls = testerresult.stoplosssell;
 			slb = testerresult.stoplossbuy;
 			
 		}
@@ -851,26 +734,18 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	for(int i=0;i<thread.randcycles;i++){
 		int t1=2,t2=1, t3=0;
 		while(t1>=t2){t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
-		testerstarts(tf,thread.point,timeout,t1,t2,t3,testerresult);
-		//if( (testerresult.profitcntpointsbuy!=-1) && (testerresult.profitcntpointssell!=-1) )
-		//if( ((testerresult.profitcntorders-testerresult.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (testerresult.profitcntorders >4) && (testerresult.profitcntorders>(testerresult.notprofitcntorders*3))){
-		//if(testerresult.profitcntorderssell>4)
+		testerstarts(tf,thread.point,thread.spr,t1,t2,t3,testerresult);
 		if(testerresult.profitcntorderssell>profitcntorderssell)
-		if((testerresult.notprofitcntorderssell*5)<testerresult.profitcntorderssell)
+		//if((testerresult.notprofitcntorderssell*8)<testerresult.profitcntorderssell)
+		if(testerresult.notprofitcntorderssell<1)
 		{
-		//if(testerresult.profitcntpointssell>profitcntpointssell){
-			//profitcntpointsbuy = testerresult.profitcntpointsbuy;
 			profitcntpointssell = testerresult.profitcntpointssell;
 			period_env2 = testerresult.period_env2;
 			period_env_k2 = testerresult.period_env_k2;
 			period_stoch_k2 = testerresult.period_stoch_k2;
-			//profitcntorders = testerresult.profitcntorders;
-			//profitcntordersbuy = testerresult.profitcntordersbuy;
 			profitcntorderssell = testerresult.profitcntorderssell;
-			//notprofitcntorders = testerresult.notprofitcntorders;
 			notprofitcntorderssell = testerresult.notprofitcntorderssell;
 			sls = testerresult.stoplosssell;
-			//slb = testerresult.stoplossbuy;
 			
 		}
 	}
@@ -893,10 +768,10 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	
 	return 0;
 }
-const char* testertest(const char* ctf,double point, const char* ctimeout,int spr) {
+const char* testertest(const char* ctf,double point, int spr) {
 	static char itemconfig[200]="";
 	memset(itemconfig,0,200);
-	int tf=strToInt(ctf);int timeout=strToInt(ctimeout);
+	int tf=strToInt(ctf);
 	int tpb,tps;
 
 	SYSTEM_INFO sysinfo;
@@ -907,8 +782,8 @@ const char* testertest(const char* ctf,double point, const char* ctimeout,int sp
 		threads[i].done = false;
 		threads[i].id = i;
 		threads[i].tf = tf;
-		threads[i].timeout = timeout;
 		threads[i].point = point;
+		threads[i].spr = spr;
 		threads[i].randcycles = randcycles;
 		threads[i].handleclosed = false;
 		threads[i].handle=CreateThread(0, 0, myThread, &threads[i], 0, &threads[i].threadid);
@@ -934,7 +809,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout,int sp
 	int sls=0,slb=0;
 	for(int i=0;i<treadcount;i++){
 	//	if( ((threads[i].results.profitcntorders-threads[i].results.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (threads[i].results.profitcntorders >4) && (threads[i].results.profitcntorders>(threads[i].results.notprofitcntorders*3))){
-		if(threads[i].results.profitcntorders>1)
+		if(threads[i].results.profitcntorders>0)
 		if((threads[i].results.profitcntorders-threads[i].results.notprofitcntorders)>(profitcntorders-notprofitcntorders)){
 			profitcntpointsbuy = threads[i].results.profitcntpointsbuy;
 			profitcntpointssell = threads[i].results.profitcntpointssell;
@@ -962,7 +837,7 @@ const char* testertest(const char* ctf,double point, const char* ctimeout,int sp
 	lstrcat(itemconfig,intToStr(period_env_k));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_stoch_k));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(tps));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,ctimeout);lstrcat(itemconfig," ");
+	lstrcat(itemconfig,"9999 ");
 	lstrcat(itemconfig,intToStr(spr));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(notprofitcntorders));lstrcat(itemconfig," ");	
 	lstrcat(itemconfig,intToStr(profitcntorders));lstrcat(itemconfig," ");
@@ -1173,7 +1048,7 @@ void ZigZag(double Point){
 			curhl=ExtZigzagBuffer[i];curpos=i;break;
 		}
 	}
-	for(int i=0;i<5000;i++){extremums->high[i]=0;extremums->low[i]=0;}
+	for(int i=0;i<50000;i++){extremums->high[i]=0;extremums->low[i]=0;}
 	extremums->barscnt = 1;
 	for(int i=curpos+1;i<bars;i++){
 		if(ExtZigzagBuffer[i]!=0.0){
@@ -1208,7 +1083,7 @@ void ZigZag(double Point){
 	extremums->midprofit = (profit/(extremums->barscnt-2)/2);
 }
 
-const char* optimize(const char* symbol,const char* tf, const char* timeout,int spr) {
+const char* optimize(const char* symbol,const char* tf, int spr) {
 	double point = loadHST(symbol,tf);
 	ZigZag(point);
 	
@@ -1226,7 +1101,7 @@ printf(doubleToStr(eresult.up,4));printf("  ");printf(doubleToStr(eresult.down,4
 printf(doubleToStr(sresult.K,4));printf("  ");printf(doubleToStr(sresult.D,4));printf("  ");			
 printf(doubleToStr(sresult1.K,4));printf("  ");printf(doubleToStr(sresult1.D,4));printf("  ");
 	return (const char *)"  "; */
-	return (const char *)testertest(tf,point,timeout,spr);
+	return (const char *)testertest(tf,point,spr);
 }
 void ReadConfig(){
 	
@@ -1446,7 +1321,7 @@ int main(int argc, char *argv[]){
 	timeshift = strToInt(argv[4]);
 	//if(bars<=(timeshift+1500))bars=timeshift+1500;
 	char *stm1;stm1 = (char *)malloc(400000);memset(stm1,0,400000);
-	char tf[10];memset(tf,0,10);char timeout[60];memset(timeout,0,60);char takeprofitbuy[10];memset(takeprofitbuy,0,10);
+	char tf[10];memset(tf,0,10);int timeout[60];memset(timeout,0,60);char takeprofitbuy[10];memset(takeprofitbuy,0,10);
 	char optresult[300];memset(optresult,0,300);
 	
 	testermetadata = new mdata[1];
@@ -1460,9 +1335,9 @@ int main(int argc, char *argv[]){
 		if(i2<tfdepth){
 			memset(tf,0,10);memset(timeout,0,60);memset(optresult,0,300);
 			lstrcat(tf,GetElement(&config[i1][i2+2][0],0));
-			lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
+			//lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
 			int spr = strToInt(GetElement(&config[i1][i2+2][0],6));
-			lstrcat(optresult,optimize(&config[i1][1][0],tf,timeout,spr));
+			lstrcat(optresult,optimize(&config[i1][1][0],tf,spr));
 			printf(optresult);printf("\r\n");
 			PatchConfig(&config[i1][1][0],optresult);
 		}else {
