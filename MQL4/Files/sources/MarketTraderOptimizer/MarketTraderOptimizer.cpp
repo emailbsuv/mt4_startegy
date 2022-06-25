@@ -116,11 +116,16 @@ int rand(int min, int max, int cpuid){
 	randbytes[cpuid][256]=(randbytes[cpuid][256]+1)%256;	
 	return h;
 }
+
 inline char* intToStr(int i){
 	static char strt[18]="";memset(strt,0,18);
 	snprintf(strt, 17, "%ld", i);
 
 	return (char *)strt;
+}
+void prand(int cpuid){
+for(int z=0;z<256;z++){printf(intToStr(randbytes[cpuid][z]));printf(" ");}
+	printf("\r\n");
 }
 inline int strToInt(const char *s){
 	char *endChar;
@@ -639,7 +644,7 @@ void testerstarts(int tf, double point, int spr, int period_env, int period_env_
 
 	for(int i=250;i<bars;i++){
 		if((openorder>=0)&&(openorderclosed==0)){
-			int profitorders = (int)((testermetadata->low[i]-openorderprice)/point)-testermetadata->spread[bars-2];
+			int profitorders = (int)((testermetadata->low[i]-openorderprice)/point);
 			if((profitorders<0)&&(openorder==OP_SELL)){
 				profitcntorderssell++;
 				profitcntpointssell+=abs((testermetadata->low[iLowest(timeout,i)]-openorderprice)/point);
@@ -698,11 +703,22 @@ struct tthread{
 	int spr;
 	int randcycles;
 	bool done;
+	int itr;
 	tresults results;
 	tresults tmpresults;
 };
 int treadcount;
-
+int time1(const time_t st) {
+     tm stm1;
+     time_t st1;
+    st1=time(0);
+	memset(&stm1,0,sizeof(struct tm));
+	if(st==0)
+	stm1=*localtime((const time_t *)&st1);
+	else
+	stm1=*localtime((const time_t *)&st);
+	return (int)mktime(&stm1);
+}
 DWORD WINAPI myThread(LPVOID lpParameter){
 	tthread& thread = *((tthread*)lpParameter);
 	
@@ -711,10 +727,15 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	int sls=0,slb=0;
 	tresults& testerresult = thread.tmpresults;
 	
+	thread.itr=0;
 	int tf=thread.tf;int timeout=thread.timeout;
-	for(int i=0;i<thread.randcycles;i++){
+	int t1=time1(NULL);
+	//int y=thread.randcycles;if(tf>15)y*=2;if(tf>30)y*=2;
+	//for(int i=0;i<y;i++){
+	while((time1(NULL)-t1)<30){
 		int t1=2,t2=1, t3=0;
-		while(t1>=t2){t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
+		//while(t1>=t2)
+		{t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
 		testerstartb(tf,thread.point,thread.spr,t1,t2,t3,testerresult);
 		if(testerresult.profitcntorders>profitcntorders)
 		//if((testerresult.notprofitcntorders*8)<testerresult.profitcntorders)
@@ -730,10 +751,15 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 			slb = testerresult.stoplossbuy;
 			
 		}
+		thread.itr++;
 	}
-	for(int i=0;i<thread.randcycles;i++){
+	
+	//for(int i=0;i<thread.randcycles;i++){
+	t1=time1(NULL);
+	while((time1(NULL)-t1)<30){	
 		int t1=2,t2=1, t3=0;
-		while(t1>=t2){t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
+		//while(t1>=t2)
+		{t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
 		testerstarts(tf,thread.point,thread.spr,t1,t2,t3,testerresult);
 		if(testerresult.profitcntorderssell>profitcntorderssell)
 		//if((testerresult.notprofitcntorderssell*8)<testerresult.profitcntorderssell)
@@ -748,6 +774,7 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 			sls = testerresult.stoplosssell;
 			
 		}
+		thread.itr++;
 	}
 	thread.results.profitcntpointsbuy = profitcntpointsbuy;
 	thread.results.profitcntpointssell = profitcntpointssell;
@@ -806,7 +833,7 @@ const char* testertest(const char* ctf,double point, int spr) {
 	
 	int profitcntpoints=0,profitcntorders=0,notprofitcntorders=0,period_env=0,period_env_k=0,period_stoch_k=0,period_env2=0,period_env_k2=0,period_stoch_k2=0;
 	int profitcntpointsbuy=0,profitcntpointssell=0,profitcntordersbuy=0,profitcntorderssell=0;
-	int sls=0,slb=0;
+	int sls=0,slb=0,itrs=0;
 	for(int i=0;i<treadcount;i++){
 	//	if( ((threads[i].results.profitcntorders-threads[i].results.notprofitcntorders)>(profitcntorders-notprofitcntorders)) && (threads[i].results.profitcntorders >4) && (threads[i].results.profitcntorders>(threads[i].results.notprofitcntorders*3))){
 		if(threads[i].results.profitcntorders>0)
@@ -826,6 +853,8 @@ const char* testertest(const char* ctf,double point, int spr) {
 			sls = threads[i].results.stoplosssell;
 			slb = threads[i].results.stoplossbuy;
 		}
+		//prand(i);
+		itrs+=threads[i].itr;
 	}
 
 	tpb = 0;
@@ -846,7 +875,8 @@ const char* testertest(const char* ctf,double point, int spr) {
 	lstrcat(itemconfig,intToStr(tpb));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_env2));lstrcat(itemconfig," ");
 	lstrcat(itemconfig,intToStr(period_env_k2));lstrcat(itemconfig," ");
-	lstrcat(itemconfig,intToStr(period_stoch_k2));
+	lstrcat(itemconfig,intToStr(period_stoch_k2));lstrcat(itemconfig," ");
+	lstrcat(itemconfig,intToStr(itrs));
 	return (const char *)itemconfig;
 }
 
@@ -1296,17 +1326,6 @@ size_t to_narrow(const wchar_t * src, char * dest, size_t dest_len){
   return i - 1;
 
 }
-int time1(const time_t st) {
-     tm stm1;
-     time_t st1;
-    st1=time(0);
-	memset(&stm1,0,sizeof(struct tm));
-	if(st==0)
-	stm1=*localtime((const time_t *)&st1);
-	else
-	stm1=*localtime((const time_t *)&st);
-	return (int)mktime(&stm1);
-}
 int main(int argc, char *argv[]){
 	printf(timeToStr(time(NULL))); printf(" - time start\r\n");
 	SleepEx(3000,true);
@@ -1338,6 +1357,7 @@ int main(int argc, char *argv[]){
 			//lstrcat(timeout,GetElement(&config[i1][i2+2][0],5));
 			int spr = strToInt(GetElement(&config[i1][i2+2][0],6));
 			lstrcat(optresult,optimize(&config[i1][1][0],tf,spr));
+			printf(timeToStr(time(NULL))); printf("  ");
 			printf(optresult);printf("\r\n");
 			PatchConfig(&config[i1][1][0],optresult);
 		}else {
