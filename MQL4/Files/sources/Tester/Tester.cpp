@@ -670,7 +670,7 @@ char* SaveResults(){
    int bufflen = 16+strlen(membuf)+strlen(src_str);
    //printf(&buff[16]);return 0;
    
-/*    WSADATA ws;
+    WSADATA ws;
    WSAStartup (MAKEWORD( 1, 1 ), &ws);
 
    SOCKET s;
@@ -678,16 +678,20 @@ char* SaveResults(){
    sockaddr_in sock_addr;
    ZeroMemory(&sock_addr, sizeof (sock_addr));
    sock_addr.sin_family = AF_INET;
-   sock_addr.sin_addr.s_addr = inet_addr ("34.65.157.210");//192.168.127.133");
+   struct hostent *h;
+   if((h=gethostbyname("markettrader.mooo.com")) == NULL) goto ff10;
+   memcpy((char *) &sock_addr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
+   //sock_addr.sin_addr.s_addr = inet_addr ("34.121.129.140");//192.168.127.133");
    sock_addr.sin_port = htons (6666);
    connect (s, (sockaddr *) &sock_addr, sizeof (sock_addr) );
 
    //send (s, (char* ) & buff, bufflen, 0 );
    //send (s,reinterpret_cast<const unsigned char*>(&buff), bufflen, 0 );
    send (s, buff, bufflen, 0 );
-   
+
+ff10:   
    closesocket (s);
-   WSACleanup(); */
+   WSACleanup(); 
    
    free(buff);
    free(src_str);	
