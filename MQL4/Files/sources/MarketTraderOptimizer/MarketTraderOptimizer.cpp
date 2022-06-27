@@ -730,12 +730,10 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 	thread.itr=0;
 	int tf=thread.tf;int timeout=thread.timeout;
 	int t1=time1(NULL);
-	//int y=thread.randcycles;if(tf>15)y*=2;if(tf>30)y*=2;
-	//for(int i=0;i<y;i++){
 	while((time1(NULL)-t1)<30){
 		int t1=2,t2=1, t3=0;
 		//while(t1>=t2)
-		{t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
+		{t1=rand(22,88,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
 		testerstartb(tf,thread.point,thread.spr,t1,t2,t3,testerresult);
 		if(testerresult.profitcntorders>profitcntorders)
 		//if((testerresult.notprofitcntorders*8)<testerresult.profitcntorders)
@@ -754,12 +752,11 @@ DWORD WINAPI myThread(LPVOID lpParameter){
 		thread.itr++;
 	}
 	
-	//for(int i=0;i<thread.randcycles;i++){
 	t1=time1(NULL);
 	while((time1(NULL)-t1)<30){	
 		int t1=2,t2=1, t3=0;
 		//while(t1>=t2)
-		{t1=rand(22,44,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
+		{t1=rand(22,88,thread.id);t2=rand(10,120,thread.id);t3=rand(22,88,thread.id);}
 		testerstarts(tf,thread.point,thread.spr,t1,t2,t3,testerresult);
 		if(testerresult.profitcntorderssell>profitcntorderssell)
 		//if((testerresult.notprofitcntorderssell*8)<testerresult.profitcntorderssell)

