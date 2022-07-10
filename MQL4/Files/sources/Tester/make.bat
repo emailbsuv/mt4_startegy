@@ -1,1 +1,0 @@
-g++ -m32 -mfpmath=sse Tester.cpp -o Tester.exe -lWinmm -w -lwsock32 -lws2_32

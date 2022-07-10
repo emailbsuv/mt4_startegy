@@ -1,1 +1,0 @@
-g++ -m32 -mfpmath=sse MarketTraderOptimizer.cpp -o MarketTraderOptimizer.exe -lWinmm -w
