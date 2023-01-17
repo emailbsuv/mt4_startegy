@@ -1,5 +1,8 @@
+v1.083-stochstochtral - date 17.01.2023
+Исправлены ошибки во встроенной функции mql4 iBars версий от v1.082-stochstochtral и ниже
+
 v1.082-stochstochtral - date 15.01.2023
-Исправлены ошибки в индикаторе ZigZag версний от v1.081-stochstochtral и ниже
+Исправлены ошибки в индикаторе ZigZag версий от v1.081-stochstochtral и ниже
 
 v1.081-stochstochtral - date 15.01.2023
 Исправлены ошибки автоматической подкачки истории v1.08-stochstochtral
