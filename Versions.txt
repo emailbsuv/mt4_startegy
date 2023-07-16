@@ -1,3 +1,6 @@
+v1.088-stochstochtral - date 16.07.2023
+Добавлена функция bool Filter3Positions() в MQL4, MQL5
+
 v1.087-stochstochtral - date 12.07.2023
 Свежая оптимизация для MQL4, MQL5
 
