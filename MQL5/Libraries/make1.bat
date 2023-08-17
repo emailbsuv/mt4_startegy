@@ -1,0 +1,1 @@
+g++ -m64 -shared -o MarketTraderTensorFlow.dll main.cpp main.def -LC:\git\mt_server\markettrader.mooo.com\cpp\MarketTraderTensorFlow\ -lpython311 -D ADD_EXPORTS

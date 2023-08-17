@@ -1,0 +1,2 @@
+v0.1-tensorflow - date 18.08.2023
+Завершен механизм интеграции: MT5<-MarketTrader.mq5<-DLL<-Python<-TensorFlow. Созданы файлы Readme.txt, Versions.txt
