@@ -2,7 +2,7 @@
 
 Установка.
 1. Копируем папку MQL5 в папку терминала.
-2. Устанавливаем python: https://www.python.org/downloads/
+2. Устанавливаем python: https://www.python.org/downloads/  . При установке python устанавливаем галочку "Проставить пути в окружении"
 3. Устанавливаем pip: сохраняем файл https://bootstrap.pypa.io/get-pip.py , открываем cmd и вводим python get-pip.py
 4. Устанавливаем tensorflow: открываем cmd и вводим pip install tensorflow
 5. Устанавливаем numpy: открываем cmd и вводим pip install numpy

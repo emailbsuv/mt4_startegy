@@ -21,8 +21,10 @@ def predict():
 
 	def create_predict(data1, valname):
 		data = data1[:, 3]
+		if "JPY" in valname:
+			data = np.array([value / 100 for value in data])
 		o = data[-1]
-		seq_length = 999
+		seq_length = 1399
 		X_train, y_train = create_dataset(data, seq_length)
 		X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
 
@@ -60,7 +62,7 @@ def predict():
 	formatted_date = current_date.strftime("%d.%m.%Y")
 
 
-	file_mask = "*_W1.txt"
+	file_mask = "*_D1.txt"
 	file_names = glob.glob(file_mask)
 
 	data1 = [["",0.1,0,0,0]]
@@ -84,10 +86,27 @@ def predict():
 		# result.append(row)
 
 	# print("Prediction W1 OHLC ",formatted_date)
-	with open("predict.txt", "w") as file:
+	file_name = "predict.log"
+	temp_file_name = "temp_" + file_name
+	with open(temp_file_name, "w") as file:
+		print("Predict D1 ohlC ",formatted_date, file=file)
 		for row in result:
-		  print(row, file=file)	
+		  print(row, file=file)
+		print(" ", file=file)
+		print(" ", file=file)
+	# Читаем содержимое оригинального файла и записываем его после нового содержимого
+	with open(temp_file_name, "a") as temp_file, open(file_name, "r") as original_file:
+		temp_file.write(original_file.read())
+	os.remove(file_name)
+	os.rename(temp_file_name, file_name)
+	first_element = result[0][0]
+	last_element = result[-1][0]
+	trimmed_first_element = first_element[:-7]
+	trimmed_last_element = last_element[:-7]
+	with open("predict.txt", "w") as file:
+		print(trimmed_first_element, file=file)
+		print(trimmed_last_element, file=file)	
 	pass
 # Выводим информацию о модели
 # model.summary()
-predict()
+# predict()
