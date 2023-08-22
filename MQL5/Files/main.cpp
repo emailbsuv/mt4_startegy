@@ -1,8 +1,11 @@
 #include <windows.h>
 #include <Python.h>
 
-int main() {
+#pragma comment(lib, "python311.lib")
 
+int main() {
+  char* terminal = new char[500];memset(terminal,0,500);
+  lstrcat(terminal,"paramsT");
   Py_Initialize();
   
   PyObject *pName, *pModule, *pFunc;
